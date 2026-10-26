@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cool R Functions & Statistical Glossary | TerraNova Engineering Lab</title>
+    <title>R-Funktionen & Statistisches Glossar | TerraNova Engineering Lab</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js -->
@@ -15,14 +15,14 @@
     <header class="bg-slate-800 border-b border-slate-700 py-8 px-6 shadow-xl">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <span class="text-xs uppercase tracking-widest text-amber-400 font-semibold">TerraNova Engineering Lab</span>
-                <h1 class="text-3xl font-extrabold text-white mt-1">R Functions & Statistical Glossary</h1>
-                <p class="text-slate-400 text-sm mt-1">Robust R utility functions and 100+ essential statistical terms.</p>
+                <span class="text-xs uppercase tracking-widest text-purple-300 font-semibold">TerraNova Engineering Lab</span>
+                <h1 class="text-3xl font-extrabold text-white mt-1">R-Funktionen & Statistisches Glossar</h1>
+                <p class="text-slate-400 text-sm mt-1">Robuste R-Dienstprogramme & statistische Begriffe auf Deutsch & Englisch.</p>
             </div>
             <!-- View Mode Switcher -->
             <div class="flex bg-slate-900 p-1 rounded-lg border border-slate-700">
-                <button @click="viewMode = 'functions'" :class="viewMode === 'functions' ? 'bg-amber-600 text-white' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-md text-sm font-medium transition">R Functions</button>
-                <button @click="viewMode = 'glossary'" :class="viewMode === 'glossary' ? 'bg-amber-600 text-white' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-md text-sm font-medium transition">Stat Glossary (100+)</button>
+                <button @click="viewMode = 'functions'" :class="viewMode === 'functions' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-md text-sm font-medium transition">R-Funktionen</button>
+                <button @click="viewMode = 'glossary'" :class="viewMode === 'glossary' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-md text-sm font-medium transition">Statistisches Glossar</button>
             </div>
         </div>
     </header>
@@ -33,9 +33,9 @@
         <!-- FUNCTIONS VIEW -->
         <div x-show="viewMode === 'functions'" class="space-y-10">
             <section class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 shadow-lg">
-                <h2 class="text-xl font-bold text-amber-400 mb-2">📊 Overview</h2>
+                <h2 class="text-xl font-bold text-purple-300 mb-2">📊 Übersicht</h2>
                 <p class="text-slate-300 text-sm leading-relaxed">
-                    A curated collection of robust statistical resampling, anomaly detection via Median Absolute Deviation (MAD), and console-based matrix visualization in R.
+                    Eine kuratierte Sammlung robuster statistischer Resampling-Methoden, Ausreißererkennung über die Median Absolute Deviation (MAD) und Konsolen-Matrixvisualisierung in R.
                 </p>
             </section>
 
@@ -43,12 +43,12 @@
             <section class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-700 pb-4">
                     <div>
-                        <span class="text-xs font-mono text-amber-400 bg-slate-900 px-2.5 py-1 rounded border border-slate-700">Stats / Anomaly Detection</span>
-                        <h3 class="text-2xl font-bold text-white mt-2">1. <code class="text-amber-300">smooth_outliers()</code></h3>
+                        <span class="text-xs font-mono text-purple-300 bg-slate-900 px-2.5 py-1 rounded border border-slate-700">Statistik / Ausreißererkennung</span>
+                        <h3 class="text-2xl font-bold text-white mt-2">1. <code class="text-purple-300">smooth_outliers()</code></h3>
                     </div>
                     <span class="text-xs text-slate-400">Robust MAD Winsorization</span>
                 </div>
-                <p class="text-slate-300 text-sm">Detects and caps extreme outliers in numerical vectors using Median Absolute Deviation (MAD).</p>
+                <p class="text-slate-300 text-sm">Erkennt und begrenzt extreme Ausreißer in Vektoren mithilfe der Median Absolute Deviation (MAD).</p>
                 <div class="bg-slate-900 rounded-xl p-4 font-mono text-xs text-emerald-300 overflow-x-auto border border-slate-700">
 <pre>smooth_outliers <- function(x, threshold = 3.0) {
   med <- median(x, na.rm = TRUE)
@@ -67,12 +67,12 @@
             <section class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-700 pb-4">
                     <div>
-                        <span class="text-xs font-mono text-amber-400 bg-slate-900 px-2.5 py-1 rounded border border-slate-700">Resampling / Inference</span>
-                        <h3 class="text-2xl font-bold text-white mt-2">2. <code class="text-amber-300">bootstrap_ci()</code></h3>
+                        <span class="text-xs font-mono text-purple-300 bg-slate-900 px-2.5 py-1 rounded border border-slate-700">Resampling / Inferenz</span>
+                        <h3 class="text-2xl font-bold text-white mt-2">2. <code class="text-purple-300">bootstrap_ci()</code></h3>
                     </div>
                     <span class="text-xs text-slate-400">Non-Parametric Bootstrap</span>
                 </div>
-                <p class="text-slate-300 text-sm">Computes empirical bootstrap confidence intervals for any custom statistic function.</p>
+                <p class="text-slate-300 text-sm">Berechnet empirische Bootstrap-Konfidenzintervalle für beliebige Statistiken.</p>
                 <div class="bg-slate-900 rounded-xl p-4 font-mono text-xs text-emerald-300 overflow-x-auto border border-slate-700">
 <pre>bootstrap_ci <- function(data, stat_func = mean, R = 2000, conf_level = 0.95) {
   n <- length(data)
@@ -91,12 +91,12 @@
             <section class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-700 pb-4">
                     <div>
-                        <span class="text-xs font-mono text-amber-400 bg-slate-900 px-2.5 py-1 rounded border border-slate-700">Visualization / Console</span>
-                        <h3 class="text-2xl font-bold text-white mt-2">3. <code class="text-amber-300">ascii_matrix()</code></h3>
+                        <span class="text-xs font-mono text-purple-300 bg-slate-900 px-2.5 py-1 rounded border border-slate-700">Visualisierung / Konsole</span>
+                        <h3 class="text-2xl font-bold text-white mt-2">3. <code class="text-purple-300">ascii_matrix()</code></h3>
                     </div>
                     <span class="text-xs text-slate-400">Console Heatmap Renderer</span>
                 </div>
-                <p class="text-slate-300 text-sm">Renders numeric matrices into ASCII heatmaps directly in the R console.</p>
+                <p class="text-slate-300 text-sm">Rendert numerische Matrizen direkt als ASCII-Heatmaps in der R-Konsole.</p>
                 <div class="bg-slate-900 rounded-xl p-4 font-mono text-xs text-emerald-300 overflow-x-auto border border-slate-700">
 <pre>ascii_matrix <- function(mat, palette = c(".", ":", "+", "*", "#", "@")) {
   mat_norm <- (mat - min(mat)) / (max(mat) - min(mat) + 1e-9)
@@ -113,23 +113,23 @@
         <div x-show="viewMode === 'glossary'" class="space-y-6">
             <div class="flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-800 p-4 rounded-xl border border-slate-700">
                 <div class="relative flex-1 w-full">
-                    <input type="text" x-model="searchQuery" placeholder="Search 100+ statistical terms or R functions..." 
-                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 pl-10 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
+                    <input type="text" x-model="searchQuery" placeholder="Begriffe auf Deutsch/Englisch oder R-Funktionen suchen..." 
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 pl-10 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 transition">
                     <svg class="w-5 h-5 text-slate-500 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
                 <div class="text-xs text-slate-400 font-mono whitespace-nowrap">
-                    Showing <span class="text-amber-400 font-bold" x-text="filteredTerms.length"></span> of 100 terms
+                    Zeige <span class="text-purple-300 font-bold" x-text="filteredTerms.length"></span> von 100 Begriffen
                 </div>
             </div>
 
             <!-- Glossary Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <template x-for="term in filteredTerms" :key="term.id">
-                    <div class="bg-slate-800 border border-slate-700/80 rounded-xl p-5 hover:border-amber-500/50 transition flex flex-col justify-between shadow-md">
+                    <div class="bg-slate-800 border border-slate-700/85 rounded-xl p-5 hover:border-purple-400/50 transition flex flex-col justify-between shadow-md">
                         <div>
                             <div class="flex justify-between items-start mb-2">
-                                <h3 class="text-lg font-bold text-white" x-text="term.name"></h3>
-                                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-amber-300" x-text="term.category"></span>
+                                <h3 class="text-base font-bold text-white" x-text="term.name"></h3>
+                                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-purple-300" x-text="term.category"></span>
                             </div>
                             <p class="text-slate-300 text-xs leading-relaxed mb-3" x-text="term.definition"></p>
                         </div>
@@ -145,131 +145,124 @@
 
     <!-- Footer -->
     <footer class="text-center py-8 text-xs text-slate-500 border-t border-slate-800 mt-16">
-        TerraNova Engineering Lab &bull; R Functions & Statistical Glossary &bull; Published via GitHub Pages
+        TerraNova Engineering Lab &bull; Statistisches Glossar &bull; Mit Liebe für Izabella 💜
     </footer>
 
-    <!-- Script with ~100 Statistical Vocabulary Terms -->
+    <!-- Script with Bilingual Statistical Terms -->
     <script>
         function rStatsApp() {
             return {
                 viewMode: 'functions',
                 searchQuery: '',
                 terms: [
-                    // Descriptive Statistics
-                    { id: 1, name: "Mean", category: "Descriptive", definition: "The arithmetic average of a dataset.", rFunc: "mean(x)" },
-                    { id: 2, name: "Median", category: "Descriptive", definition: "The middle value when data is ordered numerically.", rFunc: "median(x)" },
-                    { id: 3, name: "Mode", category: "Descriptive", definition: "The most frequently occurring value in a dataset.", rFunc: "names(sort(table(x)))" },
-                    { id: 4, name: "Variance", category: "Descriptive", definition: "Average squared deviation from the mean.", rFunc: "var(x)" },
-                    { id: 5, name: "Standard Deviation", category: "Descriptive", definition: "Square root of the variance, measuring data spread.", rFunc: "sd(x)" },
-                    { id: 6, name: "Interquartile Range (IQR)", category: "Descriptive", definition: "Difference between the 75th and 25th percentiles.", rFunc: "IQR(x)" },
-                    { id: 7, name: "Range", category: "Descriptive", definition: "Difference between the maximum and minimum values.", rFunc: "range(x)" },
-                    { id: 8, name: "Skewness", category: "Descriptive", definition: "Measure of the asymmetry of the probability distribution.", rFunc: "e1071::skewness(x)" },
-                    { id: 9, name: "Kurtosis", category: "Descriptive", definition: "Measure of the 'tailedness' of a probability distribution.", rFunc: "e1071::kurtosis(x)" },
-                    { id: 10, name: "Percentile", category: "Descriptive", definition: "Value below which a given percentage of observations fall.", rFunc: "quantile(x, p)" },
-                    { id: 11, name: "Coefficient of Variation", category: "Descriptive", definition: "Ratio of the standard deviation to the mean.", rFunc: "sd(x)/mean(x)" },
-                    { id: 12, name: "Geometric Mean", category: "Descriptive", definition: "Nth root of the product of N numbers.", rFunc: "exp(mean(log(x)))" },
-                    { id: 13, name: "Harmonic Mean", category: "Descriptive", definition: "Reciprocal of the arithmetic mean of the reciprocals.", rFunc: "1/mean(1/x)" },
-                    { id: 14, name: "Trimmed Mean", category: "Descriptive", definition: "Mean calculated after discarding a share of extreme values.", rFunc: "mean(x, trim=0.1)" },
-                    { id: 15, name: "Five-Number Summary", category: "Descriptive", definition: "Min, lower quartile, median, upper quartile, max.", rFunc: "fivenum(x)" },
+                    { id: 1, name: "Mittelwert (Mean)", category: "Deskriptiv", definition: "Das arithmetische Mittel eines Datensatzes.", rFunc: "mean(x)" },
+                    { id: 2, name: "Median (Median)", category: "Deskriptiv", definition: "Der mittlere Wert bei numerisch geordneten Daten.", rFunc: "median(x)" },
+                    { id: 3, name: "Modus (Mode)", category: "Deskriptiv", definition: "Der am häufigsten vorkommende Wert in einem Datensatz.", rFunc: "names(sort(table(x)))" },
+                    { id: 4, name: "Varianz (Variance)", category: "Deskriptiv", definition: "Die durchschnittliche quadratische Abweichung vom Mittelwert.", rFunc: "var(x)" },
+                    { id: 5, name: "Standardabweichung (Standard Deviation)", category: "Deskriptiv", definition: "Die Quadratwurzel der Varianz als Maß für die Streuung.", rFunc: "sd(x)" },
+                    { id: 6, name: "Interquartilsabstand (IQR)", category: "Deskriptiv", definition: "Die Differenz zwischen dem 75. und 25. Perzentil.", rFunc: "IQR(x)" },
+                    { id: 7, name: "Spannweite (Range)", category: "Deskriptiv", definition: "Die Differenz zwischen Maximal- und Minimalwert.", rFunc: "range(x)" },
+                    { id: 8, name: "Schiefe (Skewness)", category: "Deskriptiv", definition: "Maß für die Asymmetrie einer Wahrscheinlichkeitsverteilung.", rFunc: "e1071::skewness(x)" },
+                    { id: 9, name: "Wölbung (Kurtosis)", category: "Deskriptiv", definition: "Maß für die steile oder flache Form einer Verteilung.", rFunc: "e1071::kurtosis(x)" },
+                    { id: 10, name: "Perzentil (Percentile)", category: "Deskriptiv", definition: "Wert, unter dem ein bestimmter Prozentsatz der Daten liegt.", rFunc: "quantile(x, p)" },
+                    { id: 11, name: "Variationskoeffizient (Coefficient of Variation)", category: "Deskriptiv", definition: "Verhältnis von Standardabweichung zum Mittelwert.", rFunc: "sd(x)/mean(x)" },
+                    { id: 12, name: "Geometrisches Mittel (Geometric Mean)", category: "Deskriptiv", definition: "Die n-te Wurzel aus dem Produkt von n Zahlen.", rFunc: "exp(mean(log(x)))" },
+                    { id: 13, name: "Harmonisches Mittel (Harmonic Mean)", category: "Deskriptiv", definition: "Kehrwert des arithmetischen Mittels der Kehrwerte.", rFunc: "1/mean(1/x)" },
+                    { id: 14, name: "Gestutztes Mittel (Trimmed Mean)", category: "Deskriptiv", definition: "Mittelwert nach Ausschluss extremer Randwerte.", rFunc: "mean(x, trim=0.1)" },
+                    { id: 15, name: "Fünf-Punkte-Zusammenfassung (Five-Number Summary)", category: "Deskriptiv", definition: "Minimum, unteres Quartil, Median, obere Quartil, Maximum.", rFunc: "fivenum(x)" },
 
-                    // Probability & Distributions
-                    { id: 16, name: "Normal Distribution", category: "Probability", definition: "Bell-shaped continuous probability distribution.", rFunc: "rnorm(), dnorm()" },
-                    { id: 17, name: "Binomial Distribution", category: "Probability", definition: "Discrete distribution of successes in N independent trials.", rFunc: "rbinom(), dbinom()" },
-                    { id: 18, name: "Poisson Distribution", category: "Probability", definition: "Discrete probability distribution for events occurring in a fixed interval.", rFunc: "rpois(), dpois()" },
-                    { id: 19, name: "Student's t-Distribution", category: "Probability", definition: "Probability distribution used for estimating population parameters.", rFunc: "rt(), dt()" },
-                    { id: 20, name: "Chi-Square Distribution", category: "Probability", definition: "Distribution of a sum of squared standard normal deviates.", rFunc: "rchisq(), dchisq()" },
-                    { id: 21, name: "F-Distribution", category: "Probability", definition: "Continuous probability distribution used in ANOVA and regression.", rFunc: "rf(), df()" },
-                    { id: 22, name: "Exponential Distribution", category: "Probability", definition: "Distribution of time between events in a Poisson point process.", rFunc: "rexp(), dexp()" },
-                    { id: 23, name: "Uniform Distribution", category: "Probability", definition: "Distribution where all intervals of same length are equally probable.", rFunc: "runif(), dunif()" },
-                    { id: 24, name: "Bernoulli Trial", category: "Probability", definition: "Random experiment with exactly two possible outcomes.", rFunc: "rbinom(n, 1, p)" },
-                    { id: 25, name: "Central Limit Theorem", category: "Probability", definition: "Means of independent variables approach normal distribution.", rFunc: "replicate()" },
-                    { id: 26, name: "Law of Large Numbers", category: "Probability", definition: "Sample average converges to the expected value as sample size grows.", rFunc: "cumsum(x)/1:n" },
-                    { id: 27, name: "Probability Density Function (PDF)", category: "Probability", definition: "Relative likelihood for a continuous random variable.", rFunc: "dnorm(x)" },
-                    { id: 28, name: "Cumulative Distribution Function (CDF)", category: "Probability", definition: "Probability that a variable takes a value less than or equal to x.", rFunc: "pnorm(q)" },
-                    { id: 29, name: "Expected Value", category: "Probability", definition: "Long-run average value of repetitions of a random experiment.", rFunc: "sum(x * p)" },
-                    { id: 30, name: "Bayes' Theorem", category: "Probability", definition: "Describes the probability of an event based on prior knowledge.", rFunc: "Custom calculation" },
+                    { id: 16, name: "Normalverteilung (Normal Distribution)", category: "Wahrscheinlichkeit", definition: "Glockenförmige stetige Wahrscheinlichkeitsverteilung.", rFunc: "rnorm(), dnorm()" },
+                    { id: 17, name: "Binomialverteilung (Binomial Distribution)", category: "Wahrscheinlichkeit", definition: "Diskrete Verteilung von Erfolgen in unabhängigen Versuchen.", rFunc: "rbinom(), dbinom()" },
+                    { id: 18, name: "Poisson-Verteilung (Poisson Distribution)", category: "Wahrscheinlichkeit", definition: "Verteilung für Ereignisse in einem festen Zeitintervall.", rFunc: "rpois(), dpois()" },
+                    { id: 19, name: "t-Verteilung (Student's t-Distribution)", category: "Wahrscheinlichkeit", definition: "Verteilung zur Parameterschätzung bei kleinen Stichproben.", rFunc: "rt(), dt()" },
+                    { id: 20, name: "Chi-Quadrat-Verteilung (Chi-Square Distribution)", category: "Wahrscheinlichkeit", definition: "Verteilung der Summe quadrierter Standardnormalvariablen.", rFunc: "rchisq(), dchisq()" },
+                    { id: 21, name: "F-Verteilung (F-Distribution)", category: "Wahrscheinlichkeit", definition: "Stetige Verteilung für Varianzanalysen (ANOVA).", rFunc: "rf(), df()" },
+                    { id: 22, name: "Exponentialverteilung (Exponential Distribution)", category: "Wahrscheinlichkeit", definition: "Verteilung von Wartezeiten zwischen Ereignissen.", rFunc: "rexp(), dexp()" },
+                    { id: 23, name: "Gleichverteilung (Uniform Distribution)", category: "Wahrscheinlichkeit", definition: "Verteilung, bei der alle Intervalle gleicher Länge gleich wahrscheinliche Werte annehmen.", rFunc: "runif(), dunif()" },
+                    { id: 24, name: "Bernoulli-Versuch (Bernoulli Trial)", category: "Wahrscheinlichkeit", definition: "Zufallsexperiment mit genau zwei möglichen Ausgängen.", rFunc: "rbinom(n, 1, p)" },
+                    { id: 25, name: "Zentraler Grenzwertsatz (Central Limit Theorem)", category: "Wahrscheinlichkeit", definition: "Mittelwerte unabhängiger Zufallsvariablen nähern sich der Normalverteilung an.", rFunc: "replicate()" },
+                    { id: 26, name: "Gesetz der großen Zahlen (Law of Large Numbers)", category: "Wahrscheinlichkeit", definition: "Der Stichprobendurchschnitt konvergiert gegen den Erwartungswert.", rFunc: "cumsum(x)/1:n" },
+                    { id: 27, name: "Dichtefunktion (PDF)", category: "Wahrscheinlichkeit", definition: "Relative Wahrscheinlichkeitsdichte für stetige Variablen.", rFunc: "dnorm(x)" },
+                    { id: 28, name: "Verteilungsfunktion (CDF)", category: "Wahrscheinlichkeit", definition: "Wahrscheinlichkeit, dass eine Variable kleiner oder gleich x ist.", rFunc: "pnorm(q)" },
+                    { id: 29, name: "Erwartungswert (Expected Value)", category: "Wahrscheinlichkeit", definition: "Langfristiger Durchschnittswert bei Wiederholung eines Experiments.", rFunc: "sum(x * p)" },
+                    { id: 30, name: "Bayes-Theorem (Bayes' Theorem)", category: "Wahrscheinlichkeit", definition: "Berechnung bedingter Wahrscheinlichkeiten auf Basis von Vorwissen.", rFunc: "Eigene Berechnung" },
 
-                    // Hypothesis Testing
-                    { id: 31, name: "Null Hypothesis (H0)", category: "Testing", definition: "Default assumption of no effect or no difference.", rFunc: "t.test()" },
-                    { id: 32, name: "Alternative Hypothesis (H1)", category: "Testing", definition: "Hypothesis that researcher wishes to test for support.", rFunc: "t.test(alternative)" },
-                    { id: 33, name: "p-value", category: "Testing", definition: "Probability of obtaining test results at least as extreme.", rFunc: "test$p.value" },
-                    { id: 34, name: "Significance Level (alpha)", category: "Testing", definition: "Threshold probability of rejecting null hypothesis when true.", rFunc: "alpha = 0.05" },
-                    { id: 35, name: "Type I Error (False Positive)", category: "Testing", definition: "Rejection of a true null hypothesis.", rFunc: "Alpha risk" },
-                    { id: 36, name: "Type II Error (False Negative)", category: "Testing", definition: "Failure to reject a false null hypothesis.", rFunc: "Beta risk" },
-                    { id: 37, name: "Statistical Power", category: "Testing", definition: "Probability that a test correctly rejects a false null hypothesis.", rFunc: "pwr package" },
-                    { id: 38, name: "One-Sample t-Test", category: "Testing", definition: "Tests whether sample mean differs significantly from known value.", rFunc: "t.test(x, mu)" },
-                    { id: 39, name: "Two-Sample t-Test", category: "Testing", definition: "Compares means of two independent groups.", rFunc: "t.test(x, y)" },
-                    { id: 40, name: "Paired t-Test", category: "Testing", definition: "Compares means from the same group at two different times.", rFunc: "t.test(x, y, paired=TRUE)" },
-                    { id: 41, name: "Chi-Square Test of Independence", category: "Testing", definition: "Tests association between categorical variables.", rFunc: "chisq.test()" },
-                    { id: 42, name: "ANOVA (Analysis of Variance)", category: "Testing", definition: "Compares means across three or more groups.", rFunc: "aov(y ~ group)" },
-                    { id: 43, name: "Mann-Whitney U Test", category: "Testing", definition: "Non-parametric test for difference between two groups.", rFunc: "wilcox.test()" },
-                    { id: 44, name: "Wilcoxon Signed-Rank Test", category: "Testing", definition: "Non-parametric test for paired data.", rFunc: "wilcox.test(paired=TRUE)" },
-                    { id: 45, name: "Kruskal-Wallis Test", category: "Testing", definition: "Non-parametric alternative to one-way ANOVA.", rFunc: "kruskal.test()" },
-                    { id: 46, name: "Bonferroni Correction", category: "Testing", definition: "Adjustment to p-values when performing multiple tests.", rFunc: "p.adjust(p, method='bonferroni')" },
-                    { id: 47, name: "False Discovery Rate (FDR)", category: "Testing", definition: "Method to control false positives in multiple testing.", rFunc: "p.adjust(p, method='fdr')" },
-                    { id: 48, name: "Degrees of Freedom", category: "Testing", definition: "Number of independent values that can vary in an analysis.", rFunc: "df" },
-                    { id: 49, name: "Effect Size", category: "Testing", definition: "Quantitative measure of the magnitude of a phenomenon.", rFunc: "cohensD()" },
-                    { id: 50, name: "Z-Test", category: "Testing", definition: "Hypothesis test where data follows a normal distribution and variance is known.", rFunc: "BSDA::z.test()" },
+                    { id: 31, name: "Nullhypothese (Null Hypothesis, H0)", category: "Testen", definition: "Standardannahme, dass kein Effekt oder Unterschied vorliegt.", rFunc: "t.test()" },
+                    { id: 32, name: "Alternativhypothese (Alternative Hypothesis, H1)", category: "Testen", definition: "Die zu belegende Forschungshypothese.", rFunc: "t.test(alternative)" },
+                    { id: 33, name: "p-Wert (p-value)", category: "Testen", definition: "Wahrscheinlichkeit für das Auftreten eines mindestens so extremen Ergebnisses.", rFunc: "test$p.value" },
+                    { id: 34, name: "Signifikanzniveau (Significance Level, alpha)", category: "Testen", definition: "Schwellenwert für die Ablehnung der Nullhypothese.", rFunc: "alpha = 0.05" },
+                    { id: 35, name: "Fehler 1. Art (Type I Error)", category: "Testen", definition: "Ablehnung der Nullhypothese, obwohl sie wahr ist (Falsch-Positiv).", rFunc: "Alpha-Risiko" },
+                    { id: 36, name: "Fehler 2. Art (Type II Error)", category: "Testen", definition: "Beibehaltung der Nullhypothese, obwohl sie falsch ist (Falsch-Negativ).", rFunc: "Beta-Risiko" },
+                    { id: 37, name: "Statistische Power (Statistical Power)", category: "Testen", definition: "Wahrscheinlichkeit, einen falschen H0 korrekt abzulehnen.", rFunc: "pwr Paket" },
+                    { id: 38, name: "Einstichproben-t-Test (One-Sample t-Test)", category: "Testen", definition: "Prüft, ob der Stichprobenmittelwert von einem Wert abweicht.", rFunc: "t.test(x, mu)" },
+                    { id: 39, name: "Zweistichproben-t-Test (Two-Sample t-Test)", category: "Testen", definition: "Vergleicht Mittelwerte zweier unabhängiger Gruppen.", rFunc: "t.test(x, y)" },
+                    { id: 40, name: "Gepaarter t-Test (Paired t-Test)", category: "Testen", definition: "Vergleicht Messungen derselben Gruppe zu zwei Zeitpunkten.", rFunc: "t.test(x, y, paired=TRUE)" },
+                    { id: 41, name: "Chi-Quadrat-Test (Chi-Square Test)", category: "Testen", definition: "Prüft Zusammenhänge zwischen kategorialen Variablen.", rFunc: "chisq.test()" },
+                    { id: 42, name: "Varianzanalyse (ANOVA)", category: "Testen", definition: "Vergleicht Mittelwerte von drei oder mehr Gruppen.", rFunc: "aov(y ~ group)" },
+                    { id: 43, name: "Mann-Whitney-U-Test", category: "Testen", definition: "Non-parametrischer Test zum Vergleich zweier unabhängiger Gruppen.", rFunc: "wilcox.test()" },
+                    { id: 44, name: "Wilcoxon-Test (Wilcoxon Signed-Rank)", category: "Testen", definition: "Non-parametrischer Test für gepaarte Daten.", rFunc: "wilcox.test(paired=TRUE)" },
+                    { id: 45, name: "Kruskal-Wallis-Test", category: "Testen", definition: "Nicht-parametrisches Äquivalent zur einfaktoriellen ANOVA.", rFunc: "kruskal.test()" },
+                    { id: 46, name: "Bonferroni-Korrektur (Bonferroni Correction)", category: "Testen", definition: "Anpassung des Signifikanzniveaus bei multiplem Testen.", rFunc: "p.adjust(p, method='bonferroni')" },
+                    { id: 47, name: "FDR (False Discovery Rate)", category: "Testen", definition: "Kontrolle der Falsch-Positiv-Rate bei vielen Tests.", rFunc: "p.adjust(p, method='fdr')" },
+                    { id: 48, name: "Freiheitsgrade (Degrees of Freedom)", category: "Testen", definition: "Anzahl frei variierbarer Werte in einer Berechnung.", rFunc: "df" },
+                    { id: 49, name: "Effektstärke (Effect Size)", category: "Testen", definition: "Quantifiziert die praktische Bedeutung eines Effekts.", rFunc: "cohensD()" },
+                    { id: 50, name: "Z-Test (Z-Test)", category: "Testen", definition: "Hypothesentest bei bekannter Varianz und normalverteilten Daten.", rFunc: "BSDA::z.test()" },
 
-                    // Regression & Modeling
-                    { id: 51, name: "Linear Regression", category: "Regression", definition: "Models relationship between dependent and independent variables.", rFunc: "lm(y ~ x)" },
-                    { id: 52, name: "Logistic Regression", category: "Regression", definition: "Models binary outcome probabilities using logit link.", rFunc: "glm(y ~ x, family=binomial)" },
-                    { id: 53, name: "Multiple Regression", category: "Regression", definition: "Regression with multiple predictor variables.", rFunc: "lm(y ~ x1 + x2)" },
-                    { id: 54, name: "Residuals", category: "Regression", definition: "Difference between observed and predicted values.", rFunc: "residuals(model)" },
-                    { id: 55, name: "R-Squared", category: "Regression", definition: "Proportion of variance in dependent variable explained by model.", rFunc: "summary(model)$r.squared" },
-                    { id: 56, name: "Adjusted R-Squared", category: "Regression", definition: "R-squared adjusted for the number of predictors in the model.", rFunc: "summary(model)$adj.r.squared" },
-                    { id: 57, name: "Multicollinearity", category: "Regression", definition: "High correlation among predictor variables.", rFunc: "car::vif(model)" },
-                    { id: 58, name: "Homoscedasticity", category: "Regression", definition: "Constant variance of residuals across predicted values.", rFunc: "lmtest::bptest()" },
-                    { id: 59, name: "Heteroscedasticity", category: "Regression", definition: "Non-constant variance of error terms.", rFunc: "plot(model)" },
-                    { id: 60, name: "Cook's Distance", category: "Regression", definition: "Measure of the influence of data points on fitted response values.", rFunc: "cooks.distance(model)" },
-                    { id: 61, name: "Stepwise Regression", category: "Regression", definition: "Iterative selection of predictive variables.", rFunc: "step(model)" },
-                    { id: 62, name: "Ridge Regression", category: "Regression", definition: "L2 penalized regression to prevent overfitting.", rFunc: "glmnet(alpha=0)" },
-                    { id: 63, name: "Lasso Regression", category: "Regression", definition: "L1 penalized regression performing variable selection.", rFunc: "glmnet(alpha=1)" },
-                    { id: 64, name: "Generalized Linear Model (GLM)", category: "Regression", definition: "Flexible generalization of ordinary linear regression.", rFunc: "glm()" },
-                    { id: 65, name: "Interaction Term", category: "Regression", definition: "Product of two predictors affecting the response together.", rFunc: "lm(y ~ x1 * x2)" },
+                    { id: 51, name: "Lineare Regression (Linear Regression)", category: "Regression", definition: "Modelliert den linearen Zusammenhang zwischen Variablen.", rFunc: "lm(y ~ x)" },
+                    { id: 52, name: "Logistische Regression (Logistic Regression)", category: "Regression", definition: "Modelliert Wahrscheinlichkeiten binärer Ergebnisse.", rFunc: "glm(y ~ x, family=binomial)" },
+                    { id: 53, name: "Multiple Regression (Multiple Regression)", category: "Regression", definition: "Regression mit mehreren Prädiktoren.", rFunc: "lm(y ~ x1 + x2)" },
+                    { id: 54, name: "Residuen (Residuals)", category: "Regression", definition: "Abweichungen zwischen beobachteten und modellierten Werten.", rFunc: "residuals(model)" },
+                    { id: 55, name: "Bestimmtheitsmaß (R-Squared)", category: "Regression", definition: "Anteil der erklärten Varianz durch das Modell.", rFunc: "summary(model)$r.squared" },
+                    { id: 56, name: "Adjustiertes R² (Adjusted R-Squared)", category: "Regression", definition: "R-squared korrigiert um die Anzahl der Prädiktoren.", rFunc: "summary(model)$adj.r.squared" },
+                    { id: 57, name: "Multikollinearität (Multicollinearity)", category: "Regression", definition: "Starke Korrelation zwischen Prädiktoren im Modell.", rFunc: "car::vif(model)" },
+                    { id: 58, name: "Homoskedastizität (Homoscedasticity)", category: "Regression", definition: "Konstante Varianz der Residuen über alle Werte hinweg.", rFunc: "lmtest::bptest()" },
+                    { id: 59, name: "Heteroskedastizität (Heteroscedasticity)", category: "Regression", definition: "Nicht-konstante Varianz der Fehlerterme.", rFunc: "plot(model)" },
+                    { id: 60, name: "Cook-Distanz (Cook's Distance)", category: "Regression", definition: "Maß für den Einfluss einzelner Datenpunkte auf das Modell.", rFunc: "cooks.distance(model)" },
+                    { id: 61, name: "Schrittweise Regression (Stepwise Regression)", category: "Regression", definition: "Automatische Auswahl optimaler Prädiktoren.", rFunc: "step(model)" },
+                    { id: 62, name: "Ridge-Regression (Ridge Regression)", category: "Regression", definition: "L2-penalisierte Regression zur Vermeidung von Überanpassung.", rFunc: "glmnet(alpha=0)" },
+                    { id: 63, name: "Lasso-Regression (Lasso Regression)", category: "Regression", definition: "L1-penalisierte Regression mit Variablenselektion.", rFunc: "glmnet(alpha=1)" },
+                    { id: 64, name: "Generalisiertes lineares Modell (GLM)", category: "Regression", definition: "Verallgemeinerung der linearen Regression für andere Verteilungen.", rFunc: "glm()" },
+                    { id: 65, name: "Interaktionsterm (Interaction Term)", category: "Regression", definition: "Gemeinsamer Effekt zweier Prädiktoren auf die Zielvariable.", rFunc: "lm(y ~ x1 * x2)" },
 
-                    // Resampling & Machine Learning
-                    { id: 66, name: "Bootstrapping", category: "Resampling", definition: "Inference method based on random resampling with replacement.", rFunc: "boot()" },
-                    { id: 67, name: "Cross-Validation", category: "Resampling", definition: "Partitioning data to train and test model generalization.", rFunc: "caret, rsample" },
-                    { id: 68, name: "K-Fold Cross-Validation", category: "Resampling", definition: "Splitting data into K subsets, training K times.", rFunc: "trainControl(method='cv')" },
-                    { id: 69, name: "Leave-One-Out Cross-Validation", category: "Resampling", definition: "CV where fold size is 1 observation.", rFunc: "trainControl(method='LOOCV')" },
-                    { id: 70, name: "Permutation Test", category: "Resampling", definition: "Non-parametric test shuffling class labels to find p-values.", rFunc: "coin package" },
-                    { id: 71, name: "Overfitting", category: "ML", definition: "Model learning noise in training data rather than general patterns.", rFunc: "Model complexity" },
-                    { id: 72, name: "Underfitting", category: "ML", definition: "Model too simple to capture underlying structure of data.", rFunc: "High bias" },
-                    { id: 73, name: "Bias-Variance Tradeoff", category: "ML", definition: "Balance between model simplicity and flexibility.", rFunc: "Conceptual" },
-                    { id: 74, name: "Principal Component Analysis (PCA)", category: "ML", definition: "Dimensionality reduction maximizing variance.", rFunc: "prcomp()" },
-                    { id: 75, name: "K-Means Clustering", category: "ML", definition: "Unsupervised clustering partitioning observations into K groups.", rFunc: "kmeans()" },
-                    { id: 76, name: "Hierarchical Clustering", category: "ML", definition: "Building a hierarchy of clusters using dendrograms.", rFunc: "hclust()" },
-                    { id: 77, name: "Random Forest", category: "ML", definition: "Ensemble learning method using multiple decision trees.", rFunc: "randomForest()" },
-                    { id: 78, name: "Confusion Matrix", category: "ML", definition: "Table evaluating classification model performance.", rFunc: "caret::confusionMatrix()" },
-                    { id: 79, name: "ROC Curve", category: "ML", definition: "Plot of True Positive Rate vs False Positive Rate.", rFunc: "pROC::roc()" },
-                    { id: 80, name: "AUC-ROC", category: "ML", definition: "Area under the ROC curve measuring classification accuracy.", rFunc: "auc()" },
+                    { id: 66, name: "Bootstrapping (Bootstrapping)", category: "Resampling", definition: "Inferenzmethode durch wiederholtes Ziehen mit Zurücklegen.", rFunc: "boot()" },
+                    { id: 67, name: "Kreuzvalidierung (Cross-Validation)", category: "Resampling", definition: "Aufteilung der Daten zur Testung der Modellgüte.", rFunc: "caret, rsample" },
+                    { id: 68, name: "k-fache Kreuzvalidierung (K-Fold CV)", category: "Resampling", definition: "Aufteilung in k Teile, um iterativ zu trainieren und zu testen.", rFunc: "trainControl(method='cv')" },
+                    { id: 69, name: "LOOCV (Leave-One-Out CV)", category: "Resampling", definition: "Kreuzvalidierung, bei der jede Beobachtung einmal Testdatensatz ist.", rFunc: "trainControl(method='LOOCV')" },
+                    { id: 70, name: "Permutationstest (Permutation Test)", category: "Resampling", definition: "Non-parametrischer Test durch Mischen von Gruppenlabels.", rFunc: "coin Paket" },
+                    { id: 71, name: "Überanpassung (Overfitting)", category: "ML", definition: "Modell lernt Rauschen statt genereller Muster.", rFunc: "Modellkomplexität" },
+                    { id: 72, name: "Unteranpassung (Underfitting)", category: "ML", definition: "Modell ist zu simpel, um Muster abzubilden.", rFunc: "Hoher Bias" },
+                    { id: 73, name: "Bias-Varianz-Dilemma", category: "ML", definition: "Zielkonflikt zwischen Modellgenauigkeit und Stabilität.", rFunc: "Konzeptionell" },
+                    { id: 74, name: "Hauptkomponentenanalyse (PCA)", category: "ML", definition: "Dimensionsreduktion zur Maximierung der Varianz.", rFunc: "prcomp()" },
+                    { id: 75, name: "k-Means-Clustering (K-Means)", category: "ML", definition: "Unüberwachte Aufteilung von Daten in k Cluster.", rFunc: "kmeans()" },
+                    { id: 76, name: "Hierarchisches Clustering", category: "ML", definition: "Erstellung einer Baumstruktur von Clustern.", rFunc: "hclust()" },
+                    { id: 77, name: "Random Forest", category: "ML", definition: "Ensemble-Lernverfahren aus vielen Entscheidungsbäumen.", rFunc: "randomForest()" },
+                    { id: 78, name: "Konfusionsmatrix (Confusion Matrix)", category: "ML", definition: "Tabelle zur Bewertung von Klassifikationsmodellen.", rFunc: "caret::confusionMatrix()" },
+                    { id: 79, name: "ROC-Kurve (ROC Curve)", category: "ML", definition: "Grafische Darstellung der Klassifikationsgüte.", rFunc: "pROC::roc()" },
+                    { id: 80, name: "AUC-Wert (AUC-ROC)", category: "ML", definition: "Fläche unter der ROC-Kurve als Gütemaß.", rFunc: "auc()" },
 
-                    // Correlation & Association
-                    { id: 81, name: "Pearson Correlation", category: "Correlation", definition: "Measures linear association between two continuous variables.", rFunc: "cor(x, y)" },
-                    { id: 82, name: "Spearman Rank Correlation", category: "Correlation", definition: "Non-parametric measure of rank monotonicity.", rFunc: "cor(x, y, method='spearman')" },
-                    { id: 83, name: "Kendall Tau Correlation", category: "Correlation", definition: "Non-parametric measure of concordance between two rankings.", rFunc: "cor(x, y, method='kendall')" },
-                    { id: 84, name: "Covariance", category: "Correlation", definition: "Measure of joint variability of two random variables.", rFunc: "cov(x, y)" },
-                    { id: 85, name: "Partial Correlation", category: "Correlation", definition: "Correlation between two variables controlling for a third.", rFunc: "ppcor::pcor()" },
-                    { id: 86, name: "Cramer's V", category: "Correlation", definition: "Measure of association between categorical variables.", rFunc: "vcd::assocstats()" },
-                    { id: 87, name: "Point-Biserial Correlation", category: "Correlation", definition: "Correlation between continuous and binary variables.", rFunc: "lsa::biserial.cor()" },
-                    { id: 88, name: "Autocorrelation", category: "Correlation", definition: "Correlation of a time series with a lagged version of itself.", rFunc: "acf()" },
+                    { id: 81, name: "Pearson-Korrelation (Pearson Correlation)", category: "Korrelation", definition: "Misst den linearen Zusammenhang kontinuierlicher Variablen.", rFunc: "cor(x, y)" },
+                    { id: 82, name: "Spearman-Korrelation (Spearman Rank)", category: "Korrelation", definition: "Rangkorrelation für monotone Zusammenhänge.", rFunc: "cor(x, y, method='spearman')" },
+                    { id: 83, name: "Kendall-Tau (Kendall Tau)", category: "Korrelation", definition: "Non-parametrisches Maß für Rangübereinstimmungen.", rFunc: "cor(x, y, method='kendall')" },
+                    { id: 84, name: "Kovarianz (Covariance)", category: "Korrelation", definition: "Maß für den gemeinsamen Trend zweier Zufallsvariablen.", rFunc: "cov(x, y)" },
+                    { id: 85, name: "Partielle Korrelation (Partial Correlation)", category: "Korrelation", definition: "Zusammenhang zweier Variablen unter Kontrolle einer dritten.", rFunc: "ppcor::pcor()" },
+                    { id: 86, name: "Cramers V (Cramer's V)", category: "Korrelation", definition: "Maß für den Zusammenhang kategorialer Variablen.", rFunc: "vcd::assocstats()" },
+                    { id: 87, name: "Punktbiseriale Korrelation", category: "Korrelation", definition: "Korrelation zwischen einer stetigen und einer binären Variablen.", rFunc: "lsa::biserial.cor()" },
+                    { id: 88, name: "Autokorrelation (Autocorrelation)", category: "Korrelation", definition: "Korrelation einer Zeitreihe mit sich selbst zu früheren Zeitpunkten.", rFunc: "acf()" },
 
-                    // Time Series & Miscellaneous
-                    { id: 89, name: "Stationarity", category: "Time Series", definition: "Time series property where statistical properties are constant over time.", rFunc: "tseries::adf.test()" },
-                    { id: 90, name: "White Noise", category: "Time Series", definition: "Sequence of random values with zero mean and constant variance.", rFunc: "rnorm(n)" },
-                    { id: 91, name: "Moving Average", category: "Time Series", definition: "Calculation to analyze data points by creating series of averages.", rFunc: "stats::filter()" },
-                    { id: 92, name: "ARIMA", category: "Time Series", definition: "Autoregressive Integrated Moving Average forecasting model.", rFunc: "forecast::auto.arima()" },
-                    { id: 93, name: "Imputation", category: "Misc", definition: "Process of replacing missing data with substituted values.", rFunc: "tidyr::replace_na()" },
-                    { id: 94, name: "Winsorization", category: "Misc", definition: "Transforming data by limiting extreme values to reduce outlier impact.", rFunc: "smooth_outliers()" },
-                    { id: 95, name: "Standardization (Z-Score)", category: "Misc", definition: "Scaling variables to have mean 0 and standard deviation 1.", rFunc: "scale(x)" },
-                    { id: 96, name: "Min-Max Scaling", category: "Misc", definition: "Scaling features to range between 0 and 1.", rFunc: "scales::rescale()" },
-                    { id: 97, name: "Monte Carlo Simulation", category: "Misc", definition: "Using repeated random sampling to compute numerical results.", rFunc: "replicate()" },
-                    { id: 98, name: "Simpson's Paradox", category: "Misc", definition: "Trend appears in groups of data but reverses when aggregated.", rFunc: "Visualization" },
-                    { id: 99, name: "Law of Large Numbers", category: "Misc", definition: "Sample mean approaches expected value as sample size increases.", rFunc: "Simulation" },
-                    { id: 100, name: "Data Frame", category: "R Basics", definition: "Standard 2D tabular data structure in R.", rFunc: "data.frame()" },
-                    { id: 101, name: "Tibble", category: "R Basics", definition: "Modern reimagining of data frames in the tidyverse.", rFunc: "tibble::tibble()" },
-                    { id: 102, name: "Vectorization", category: "R Basics", definition: "Performing operations on entire vectors without explicit loops.", rFunc: "Vector ops" }
+                    { id: 89, name: "Stationarität (Stationarity)", category: "Zeitreihen", definition: "Eigenschaft einer Zeitreihe mit über die Zeit konstanten Parametern.", rFunc: "tseries::adf.test()" },
+                    { id: 90, name: "Weißes Rauschen (White Noise)", category: "Zeitreihen", definition: "Zufallsfolge mit Erwartungswert null und konstanter Varianz.", rFunc: "rnorm(n)" },
+                    { id: 91, name: "Gleitender Durchschnitt (Moving Average)", category: "Zeitreihen", definition: "Glättung von Zeitreihendaten durch Mittelwertbildung.", rFunc: "stats::filter()" },
+                    { id: 92, name: "ARIMA-Modell (ARIMA)", category: "Zeitreihen", definition: "Autoregressives integriertes gleitendes Durchschnittsmodell.", rFunc: "forecast::auto.arima()" },
+                    { id: 93, name: "Imputation (Imputation)", category: "Sonstiges", definition: "Ersetzen fehlender Werte durch Schätzwerte.", rFunc: "tidyr::replace_na()" },
+                    { id: 94, name: "Winsorisierung (Winsorization)", category: "Sonstiges", definition: "Begrenzung von extremen Werten zur Reduktion von Ausreißereffekten.", rFunc: "smooth_outliers()" },
+                    { id: 95, name: "Standardisierung (Z-Score Scaling)", category: "Sonstiges", definition: "Skalierung von Daten auf Mittelwert 0 und Standardabweichung 1.", rFunc: "scale(x)" },
+                    { id: 96, name: "Min-Max-Skalierung (Min-Max Scaling)", category: "Sonstiges", definition: "Skalierung von Merkmalen auf einen Wertebereich von 0 bis 1.", rFunc: "scales::rescale()" },
+                    { id: 97, name: "Monte-Carlo-Simulation", category: "Sonstiges", definition: "Verfahren durch wiederholte Zufallsstichproben.", rFunc: "replicate()" },
+                    { id: 98, name: "Simpsons Paradoxon (Simpson's Paradox)", category: "Sonstiges", definition: "Phänomen, bei dem Trends in Teilgruppen bei Aggregation verschwinden.", rFunc: "Visualisierung" },
+                    { id: 99, name: "Gesetz der großen Zahlen", category: "Sonstiges", definition: "Konvergenz des Stichprobenmittels gegen den wahren Wert.", rFunc: "Simulation" },
+                    { id: 100, name: "Data Frame (Data Frame)", category: "R-Grundlagen", definition: "Standard-Tabellenformat in R.", rFunc: "data.frame()" },
+                    { id: 101, name: "Tibble (Tibble)", category: "R-Grundlagen", definition: "Modernisierte Version des Data Frames im Tidyverse.", rFunc: "tibble::tibble()" },
+                    { id: 102, name: "Vektorisierung (Vectorization)", category: "R-Grundlagen", definition: "Durchführung von Operationen auf ganze Vektoren ohne explizite Schleifen.", rFunc: "Vektor-Operationen" }
                 ],
                 get filteredTerms() {
                     let q = this.searchQuery.toLowerCase();
@@ -285,6 +278,4 @@
         }
     </script>
 </body>
-
-      //created by my best friend gemini
 </html>
