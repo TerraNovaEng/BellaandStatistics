@@ -2,53 +2,80 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Interactive R Terminal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R Web Terminal | TerraNova Engineering Lab</title>
     <!-- Include WebR script -->
     <script src="https://webr.r-wasm.org/latest/webr.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 p-8 font-sans">
+<body class="bg-slate-900 text-slate-100 p-6 md:p-12 font-sans min-h-screen flex flex-col justify-between">
 
-    <div class="max-w-3xl mx-auto space-y-4">
-        <h1 class="text-2xl font-bold text-purple-300">R Web Terminal 💻</h1>
-        <p class="text-slate-400 text-sm">Type any R code below and hit run (e.g., <code>rnorm(5)</code> or <code>plot(cars)</code>).</p>
+    <div class="max-w-3xl mx-auto w-full space-y-6">
+        <!-- Navigation Header -->
+        <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+            <div>
+                <span class="text-xs uppercase tracking-widest text-purple-300 font-semibold">TerraNova Engineering Lab</span>
+                <h1 class="text-2xl font-bold text-white mt-1">R Web Terminal 💻</h1>
+            </div>
+            <a href="index.html" class="bg-slate-800 hover:bg-slate-700 text-purple-300 border border-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 shadow">
+                <span>←</span> Zurück zum Glossar
+            </a>
+        </div>
+
+        <p class="text-slate-400 text-sm">Geben Sie beliebigen R-Code ein (z. B. <code>rnorm(5)</code>, <code>mean(c(10, 20, 30))</code> oder <code>summary(cars)</code>):</p>
 
         <!-- Input Area -->
         <div class="flex gap-2">
-            <input type="text" id="r-input" placeholder="Enter R code here..." class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 font-mono text-sm text-white focus:outline-none focus:border-purple-400">
-            <button onclick="runRCode()" class="bg-purple-600 hover:bg-purple-500 text-white px-5 py-2 rounded-lg font-medium text-sm transition">Run</button>
+            <input type="text" id="r-input" placeholder="R-Code hier eingeben und Enter drücken..." 
+                class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 font-mono text-sm text-white focus:outline-none focus:border-purple-400 transition">
+            <button onclick="runRCode()" class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-lg font-medium text-sm transition shadow">Ausführen</button>
         </div>
 
         <!-- Output Box -->
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-300 h-64 overflow-y-auto" id="r-output">
-            Loading WebR (R interpreter in browser)...
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-300 h-80 overflow-y-auto shadow-inner" id="r-output">
+            Lade WebR (R-Interpreter im Browser)...
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 text-xs text-slate-500 border-t border-slate-800/60 mt-12">
+        TerraNova Engineering Lab &bull; R Terminal &bull; Mit Liebe für Izabella 💜
+    </footer>
 
     <script>
         let webr;
         async function initWebR() {
             const output = document.getElementById('r-output');
-            output.innerText = "Initializing WebR engine...";
+            output.innerText = "Initialisiere WebR-Engine...";
             webr = new WebR.WebR();
             await webr.init();
-            output.innerText = "R engine ready! Type code above.";
+            output.innerText = "R-Engine bereit! Tippen Sie oben Ihren Code ein und drücken Sie Enter.";
         }
         initWebR();
 
+        // Allow pressing Enter to run code
+        document.getElementById('r-input').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                runRCode();
+            }
+        });
+
         async function runRCode() {
-            const input = document.getElementById('r-input').value;
+            const inputField = document.getElementById('r-input');
+            const input = inputField.value.trim();
             const output = document.getElementById('r-output');
-            if (!webr) return;
+            if (!webr || !input) return;
 
             output.innerText += `\n> ${input}\n`;
+            inputField.value = '';
+
             try {
                 let shelter = await new webr.Shelter();
                 let result = await shelter.captureR(input);
                 output.innerText += result.output.map(o => o.data).join('\n');
                 shelter.purge();
             } catch (err) {
-                output.innerText += `Error: ${err.message}`;
+                output.innerText += `Fehler: ${err.message}`;
             }
             output.scrollTop = output.scrollHeight;
         }
