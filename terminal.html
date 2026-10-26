@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Interactive R Terminal</title>
+    <!-- Include WebR script -->
+    <script src="https://webr.r-wasm.org/latest/webr.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 p-8 font-sans">
+
+    <div class="max-w-3xl mx-auto space-y-4">
+        <h1 class="text-2xl font-bold text-purple-300">R Web Terminal 💻</h1>
+        <p class="text-slate-400 text-sm">Type any R code below and hit run (e.g., <code>rnorm(5)</code> or <code>plot(cars)</code>).</p>
+
+        <!-- Input Area -->
+        <div class="flex gap-2">
+            <input type="text" id="r-input" placeholder="Enter R code here..." class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 font-mono text-sm text-white focus:outline-none focus:border-purple-400">
+            <button onclick="runRCode()" class="bg-purple-600 hover:bg-purple-500 text-white px-5 py-2 rounded-lg font-medium text-sm transition">Run</button>
+        </div>
+
+        <!-- Output Box -->
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-300 h-64 overflow-y-auto" id="r-output">
+            Loading WebR (R interpreter in browser)...
+        </div>
+    </div>
+
+    <script>
+        let webr;
+        async function initWebR() {
+            const output = document.getElementById('r-output');
+            output.innerText = "Initializing WebR engine...";
+            webr = new WebR.WebR();
+            await webr.init();
+            output.innerText = "R engine ready! Type code above.";
+        }
+        initWebR();
+
+        async function runRCode() {
+            const input = document.getElementById('r-input').value;
+            const output = document.getElementById('r-output');
+            if (!webr) return;
+
+            output.innerText += `\n> ${input}\n`;
+            try {
+                let shelter = await new webr.Shelter();
+                let result = await shelter.captureR(input);
+                output.innerText += result.output.map(o => o.data).join('\n');
+                shelter.purge();
+            } catch (err) {
+                output.innerText += `Error: ${err.message}`;
+            }
+            output.scrollTop = output.scrollHeight;
+        }
+    </script>
+</body>
+</html>
