@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>R-Funktionen & Statistisches Glossar | TerraNova Engineering Lab</title>
+    <title>R-Funktionen, Glossar & Terminal | TerraNova Engineering Lab</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- WebR for In-Browser R Terminal -->
+    <script src="https://webr.r-wasm.org/latest/webr.js"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans" x-data="rStatsApp()">
 
@@ -16,19 +18,14 @@
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <span class="text-xs uppercase tracking-widest text-purple-300 font-semibold">TerraNova Engineering Lab</span>
-                <h1 class="text-3xl font-extrabold text-white mt-1">R-Funktionen & Statistisches Glossar</h1>
-                <p class="text-slate-400 text-sm mt-1">Robuste R-Dienstprogramme & statistische Begriffe auf Deutsch & Englisch.</p>
+                <h1 class="text-3xl font-extrabold text-white mt-1">R-Funktionen, Glossar & Terminal</h1>
+                <p class="text-slate-400 text-sm mt-1">Robuste R-Dienstprogramme, zweisprachiges Glossar & interaktives Browser-Terminal.</p>
             </div>
-            <!-- View Mode Switcher & Terminal Link -->
-            <div class="flex flex-wrap items-center gap-2">
-                <div class="flex bg-slate-900 p-1 rounded-lg border border-slate-700">
-                    <button @click="viewMode = 'functions'" :class="viewMode === 'functions' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-md text-sm font-medium transition">R-Funktionen</button>
-                    <button @click="viewMode = 'glossary'" :class="viewMode === 'glossary' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-md text-sm font-medium transition">Statistisches Glossar</button>
-                </div>
-                <!-- Link to Terminal -->
-                <a href="terminal.html" class="bg-slate-900 border border-purple-500/50 hover:bg-purple-950/40 text-purple-300 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 shadow">
-                    <span>💻</span> R Terminal
-                </a>
+            <!-- View Mode Switcher Tabs -->
+            <div class="flex flex-wrap bg-slate-900 p-1.5 rounded-xl border border-slate-700 gap-1">
+                <button @click="viewMode = 'functions'" :class="viewMode === 'functions' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition">R-Funktionen</button>
+                <button @click="viewMode = 'glossary'" :class="viewMode === 'glossary' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition">Statistisches Glossar</button>
+                <button @click="viewMode = 'terminal'" :class="viewMode === 'terminal' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5">💻 R Terminal</button>
             </div>
         </div>
     </header>
@@ -159,6 +156,30 @@
             </div>
         </div>
 
+        <!-- TERMINAL VIEW -->
+        <div x-show="viewMode === 'terminal'" class="space-y-6">
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-700 pb-4">
+                    <div>
+                        <span class="text-xs font-mono text-purple-300 bg-slate-900 px-2.5 py-1 rounded border border-slate-700">Browser-Interpreter</span>
+                        <h2 class="text-2xl font-bold text-white mt-1">R Web Terminal 💻</h2>
+                    </div>
+                    <span class="text-xs text-slate-400">Powered by WebAssembly (webR)</span>
+                </div>
+                <p class="text-slate-300 text-sm">Geben Sie beliebigen R-Code ein (z. B. <code>rnorm(5)</code>, <code>mean(c(10, 20, 30))</code> oder <code>summary(cars)</code>):</p>
+
+                <!-- Input Area -->
+                <div class="flex gap-2">
+                    <input type="text" x-model="rInput" @keydown.enter="runRCode()" placeholder="R-Code hier eingeben und Enter drücken..." 
+                        class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 font-mono text-sm text-white focus:outline-none focus:border-purple-400 transition">
+                    <button @click="runRCode()" class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-lg font-medium text-sm transition shadow">Ausführen</button>
+                </div>
+
+                <!-- Output Box -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-300 h-96 overflow-y-auto shadow-inner whitespace-pre-wrap" id="r-output" x-text="rOutput"></div>
+            </div>
+        </div>
+
     </main>
 
     <!-- Footer -->
@@ -166,13 +187,47 @@
         TerraNova Engineering Lab &bull; Statistisches Glossar &bull; Mit Liebe für Izabella 💜
     </footer>
 
-    <!-- Script with Bilingual Statistical Terms, Speech & Clipboard Logic -->
+    <!-- Script -->
     <script>
         function rStatsApp() {
             return {
                 viewMode: 'functions',
                 searchQuery: '',
                 copiedId: null,
+                rInput: '',
+                rOutput: 'Initialisiere WebR-Engine...',
+                webrInstance: null,
+                init() {
+                    this.initTerminal();
+                },
+                async initTerminal() {
+                    try {
+                        this.webrInstance = new WebR.WebR();
+                        await this.webrInstance.init();
+                        this.rOutput = "R-Engine bereit! Tippen Sie unten Ihren Code ein und drücken Sie Enter.";
+                    } catch (err) {
+                        this.rOutput = `Fehler beim Laden von WebR: ${err.message}`;
+                    }
+                },
+                async runRCode() {
+                    let input = this.rInput.trim();
+                    if (!this.webrInstance || !input) return;
+                    this.rOutput += `\n> ${input}\n`;
+                    let currentInput = input;
+                    this.rInput = '';
+                    try {
+                        let shelter = await new this.webrInstance.Shelter();
+                        let result = await shelter.captureR(currentInput);
+                        this.rOutput += result.output.map(o => o.data).join('\n');
+                        shelter.purge();
+                    } catch (err) {
+                        this.rOutput += `Fehler: ${err.message}`;
+                    }
+                    this.$nextTick(() => {
+                        let outBox = document.getElementById('r-output');
+                        if (outBox) outBox.scrollTop = outBox.scrollHeight;
+                    });
+                },
                 speakGerman(text) {
                     if ('speechSynthesis' in window) {
                         window.speechSynthesis.cancel();
