@@ -25,6 +25,7 @@
             <div class="flex flex-wrap bg-slate-900 p-1.5 rounded-xl border border-slate-700 gap-1">
                 <button @click="viewMode = 'functions'" :class="viewMode === 'functions' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition">R-Funktionen</button>
                 <button @click="viewMode = 'glossary'" :class="viewMode === 'glossary' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition">Statistisches Glossar</button>
+                <button @click="viewMode = 'playground'" :class="viewMode === 'playground' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition">🧪 Data Playground</button>
                 <button @click="viewMode = 'terminal'" :class="viewMode === 'terminal' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5">💻 R Terminal</button>
             </div>
         </div>
@@ -156,6 +157,28 @@
             </div>
         </div>
 
+        <!-- DATA PLAYGROUND VIEW -->
+        <div x-show="viewMode === 'playground'" class="space-y-6">
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-700 pb-4">
+                    <div>
+                        <span class="text-xs font-mono text-purple-300 bg-slate-900 px-2.5 py-1 rounded border border-slate-700">Interaktive Datensätze</span>
+                        <h2 class="text-2xl font-bold text-white mt-1">🧪 R Data Playground</h2>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <select x-model="selectedDataset" @change="loadDataset()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-400">
+                            <option value="mtcars">mtcars (Motor Trend Cars)</option>
+                            <option value="iris">iris (Iris Flower Dataset)</option>
+                            <option value="faithful">faithful (Old Faithful Geyser)</option>
+                        </select>
+                        <button @click="loadDataset()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow">Daten laden</button>
+                    </div>
+                </div>
+                <p class="text-slate-300 text-sm">Wählen Sie einen klassischen R-Datensatz aus, um eine statistische Zusammenfassung (<code class="text-purple-300">summary()</code>) im Browser auszuführen.</p>
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-300 h-80 overflow-y-auto shadow-inner whitespace-pre-wrap" x-text="datasetOutput">Lade Datensatz...</div>
+            </div>
+        </div>
+
         <!-- TERMINAL VIEW -->
         <div x-show="viewMode === 'terminal'" class="space-y-6">
             <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl space-y-4">
@@ -196,6 +219,8 @@
                 copiedId: null,
                 rInput: '',
                 rOutput: 'Initialisiere WebR-Engine...',
+                selectedDataset: 'mtcars',
+                datasetOutput: 'Klicken Sie auf "Daten laden", um eine Zusammenfassung anzuzeigen.',
                 webrInstance: null,
                 init() {
                     this.initTerminal();
@@ -205,8 +230,21 @@
                         this.webrInstance = new WebR.WebR();
                         await this.webrInstance.init();
                         this.rOutput = "R-Engine bereit! Tippen Sie unten Ihren Code ein und drücken Sie Enter.";
+                        this.loadDataset();
                     } catch (err) {
                         this.rOutput = `Fehler beim Laden von WebR: ${err.message}`;
+                    }
+                },
+                async loadDataset() {
+                    if (!this.webrInstance) return;
+                    this.datasetOutput = `Lade Datensatz ${this.selectedDataset}...`;
+                    try {
+                        let shelter = await new this.webrInstance.Shelter();
+                        let result = await shelter.captureR(`summary(${this.selectedDataset})`);
+                        this.datasetOutput = result.output.map(o => o.data).join('\n');
+                        shelter.purge();
+                    } catch (err) {
+                        this.datasetOutput = `Fehler: ${err.message}`;
                     }
                 },
                 async runRCode() {
