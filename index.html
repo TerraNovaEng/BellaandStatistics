@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -131,7 +131,7 @@
                     <svg class="w-5 h-5 text-slate-500 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
                 <div class="text-xs text-slate-400 font-mono whitespace-nowrap">
-                    Zeige <span class="text-purple-300 font-bold" x-text="filteredTerms.length"></span> von 100 Begriffen
+                    Zeige <span class="text-purple-300 font-bold" x-text="filteredTerms.length"></span> von 102 Begriffen
                 </div>
             </div>
 
@@ -174,8 +174,8 @@
                         <button @click="loadDataset()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow">Daten laden</button>
                     </div>
                 </div>
-                <p class="text-slate-300 text-sm">Wählen Sie einen klassischen R-Datensatz aus, um eine statistische Zusammenfassung (<code class="text-purple-300">summary()</code>) im Browser auszuführen.</p>
-                <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-300 h-80 overflow-y-auto shadow-inner whitespace-pre-wrap" x-text="datasetOutput">Lade Datensatz...</div>
+                <p class="text-slate-300 text-sm">Wählen Sie einen klassischen R-Datensatz aus, um eine Vorschau (<code class="text-purple-300">head()</code>) und eine statistische Zusammenfassung (<code class="text-purple-300">summary()</code>) im Browser anzuzeigen.</p>
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-300 h-96 overflow-y-auto shadow-inner whitespace-pre-wrap" x-text="datasetOutput">Lade Datensatz...</div>
             </div>
         </div>
 
@@ -220,7 +220,7 @@
                 rInput: '',
                 rOutput: 'Initialisiere WebR-Engine...',
                 selectedDataset: 'mtcars',
-                datasetOutput: 'Klicken Sie auf "Daten laden", um eine Zusammenfassung anzuzeigen.',
+                datasetOutput: 'Klicken Sie auf "Daten laden", um eine Vorschau und Zusammenfassung anzuzeigen.',
                 webrInstance: null,
                 init() {
                     this.initTerminal();
@@ -240,8 +240,15 @@
                     this.datasetOutput = `Lade Datensatz ${this.selectedDataset}...`;
                     try {
                         let shelter = await new this.webrInstance.Shelter();
-                        let result = await shelter.captureR(`summary(${this.selectedDataset})`);
-                        this.datasetOutput = result.output.map(o => o.data).join('\n');
+                        let headResult = await shelter.captureR(`head(${this.selectedDataset})`);
+                        let summaryResult = await shelter.captureR(`summary(${this.selectedDataset})`);
+                        
+                        let headText = headResult.output.map(o => o.data).join('\n');
+                        let summaryText = summaryResult.output.map(o => o.data).join('\n');
+                        
+                        this.datasetOutput = `=== DATENAUSSCHNITT: head(${this.selectedDataset}) ===\n\n${headText}\n\n` +
+                                             `========================================\n` +
+                                             `=== STATISTISCHE ZUSAMMENFASSUNG: summary(${this.selectedDataset}) ===\n\n${summaryText}`;
                         shelter.purge();
                     } catch (err) {
                         this.datasetOutput = `Fehler: ${err.message}`;
