@@ -1,0 +1,18 @@
+{
+  "short_name": "R-Lab",
+  "name": "TerraNova R-Funktionen, Glossar & Terminal",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='none'><rect width='512' height='512' rx='100' fill='%230f172a'/><path d='M80 160h352v40H80z' fill='%23000000'/><path d='M80 200h352v40H80z' fill='%23dd0000'/><path d='M80 240h352v40H80z' fill='%23ffcc00'/><rect x='110' y='320' width='36' height='100' rx='6' fill='%2338bdf8'/><rect x='170' y='260' width='36' height='160' rx='6' fill='%23818cf8'/><rect x='230' y='210' width='36' height='210' rx='6' fill='%23c084fc'/><rect x='290' y='280' width='36' height='140' rx='6' fill='%23818cf8'/><rect x='350' y='350' width='36' height='70' rx='6' fill='%2338bdf8'/><path d='M100 360 C 180 230, 240 180, 290 270 C 330 340, 380 390, 420 390' stroke='%2338bdf8' stroke-width='10' stroke-linecap='round' fill='none'/></svg>",
+      "sizes": "512x512 192x192 128x128 64x64",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "display": "standalone",
+  "orientation": "any",
+  "description": "Robuste R-Dienstprogramme, zweisprachiges Glossar, interaktives Memory-Spiel & R-Terminal."
+}
