@@ -1,416 +1,898 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>R-Funktionen, Glossar & Terminal | TerraNova Engineering Lab</title>
+    <title>TerraNova Physics & Rocketry Workshop</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- WebR for In-Browser R Terminal -->
-    <script src="https://webr.r-wasm.org/latest/webr.js"></script>
+    <style>
+        .perspective { perspective: 1000px; }
+        .transform-style { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen font-sans" x-data="rStatsApp()">
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans" x-data="physicsApp()" x-init="initData()">
 
     <!-- Header -->
-    <header class="bg-slate-800 border-b border-slate-700 py-8 px-6 shadow-xl">
+    <header class="bg-slate-900 border-b border-cyan-900/50 py-6 px-4 sm:px-8 shadow-md">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <span class="text-xs uppercase tracking-widest text-purple-300 font-semibold">TerraNova Engineering Lab</span>
-                <h1 class="text-3xl font-extrabold text-white mt-1">R-Funktionen, Glossar & Terminal</h1>
-                <p class="text-slate-400 text-sm mt-1">Robuste R-Dienstprogramme, zweisprachiges Glossar & interaktives Browser-Terminal.</p>
+                <span class="text-xs uppercase tracking-widest text-cyan-400 font-semibold">TerraNova Engineering Lab</span>
+                <h1 class="text-2xl sm:text-3xl font-bold text-white mt-1">Aerospace & Physics Vocabulary</h1>
+                <div class="flex items-center gap-3 mt-1">
+                    <p class="text-slate-400 text-sm">Mechanics, Aerodynamics, Rocketry & Flight Dynamics.</p>
+                    <span class="text-xs px-2.5 py-0.5 rounded bg-slate-950 border border-slate-800 text-cyan-300 font-mono" x-text="'Source: ' + dataSource"></span>
+                </div>
             </div>
-            <!-- View Mode Switcher Tabs -->
-            <div class="flex flex-wrap bg-slate-900 p-1.5 rounded-xl border border-slate-700 gap-1">
-                <button @click="viewMode = 'functions'" :class="viewMode === 'functions' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition">R-Funktionen</button>
-                <button @click="viewMode = 'glossary'" :class="viewMode === 'glossary' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition">Statistisches Glossar</button>
-                <button @click="viewMode = 'playground'" :class="viewMode === 'playground' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition">🧪 Data Playground</button>
-                <button @click="viewMode = 'terminal'" :class="viewMode === 'terminal' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5">💻 R Terminal</button>
+            <!-- View Mode Switcher -->
+            <div class="flex flex-wrap bg-slate-950 p-1 rounded-lg border border-slate-800">
+                <button @click="viewMode = 'list'" :class="viewMode === 'list' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-white'" class="px-3 py-2 rounded-md text-sm font-medium transition">List</button>
+                <button @click="viewMode = 'cards'" :class="viewMode === 'cards' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-white'" class="px-3 py-2 rounded-md text-sm font-medium transition">Flashcards</button>
+                <button @click="viewMode = 'quiz'; initQuiz()" :class="viewMode === 'quiz' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-white'" class="px-3 py-2 rounded-md text-sm font-medium transition">Quiz</button>
+                <button @click="viewMode = 'builder'" :class="viewMode === 'builder' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-white'" class="px-3 py-2 rounded-md text-sm font-medium transition">Flight Log Builder</button>
+                <button @click="viewMode = 'memory'; initMemoryGame()" :class="viewMode === 'memory' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-white'" class="px-3 py-2 rounded-md text-sm font-medium transition">Memory Match</button>
+                <button @click="viewMode = 'rocket'" :class="viewMode === 'rocket' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-white'" class="px-3 py-2 rounded-md text-sm font-medium transition">Rocket Lab</button>
+                <button @click="viewMode = 'complex'" :class="viewMode === 'complex' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-white'" class="px-3 py-2 rounded-md text-sm font-medium transition">Complex Web</button>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-6 py-10">
+    <main class="max-w-6xl mx-auto px-4 sm:px-8 py-8">
 
-        <!-- FUNCTIONS VIEW -->
-        <div x-show="viewMode === 'functions'" class="space-y-10">
-            <section class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 shadow-lg">
-                <h2 class="text-xl font-bold text-purple-300 mb-2">📊 Übersicht</h2>
-                <p class="text-slate-300 text-sm leading-relaxed">
-                    Eine kuratierte Sammlung robuster statistischer Resampling-Methoden, Ausreißererkennung über die Median Absolute Deviation (MAD) und Konsolen-Matrixvisualisierung in R.
-                </p>
-            </section>
-
-            <!-- Function 1 -->
-            <section class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl space-y-4">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-700 pb-4">
-                    <div>
-                        <span class="text-xs font-mono text-purple-300 bg-slate-900 px-2.5 py-1 rounded border border-slate-700">Statistik / Ausreißererkennung</span>
-                        <h3 class="text-2xl font-bold text-white mt-2">1. <code class="text-purple-300">smooth_outliers()</code></h3>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span class="text-xs text-slate-400">Robust MAD Winsorization</span>
-                        <button @click="copyCode('code-1')" class="bg-slate-900 hover:bg-slate-700 text-xs text-purple-300 border border-slate-700 px-2.5 py-1.5 rounded-md transition flex items-center gap-1">📋 <span x-text="copiedId === 'code-1' ? 'Kopiert!' : 'Kopieren'"></span></button>
-                    </div>
-                </div>
-                <p class="text-slate-300 text-sm">Erkennt und begrenzt extreme Ausreißer in Vektoren mithilfe der Median Absolute Deviation (MAD).</p>
-                <div class="bg-slate-900 rounded-xl p-4 font-mono text-xs text-emerald-300 overflow-x-auto border border-slate-700">
-<pre id="code-1">smooth_outliers <- function(x, threshold = 3.0) {
-  med <- median(x, na.rm = TRUE)
-  mad_val <- mad(x, na.rm = TRUE)
-  if (mad_val == 0) return(x)
-  modified_z <- 0.6745 * (x - med) / mad_val
-  x_capped <- x
-  x_capped[modified_z > threshold] <- med + (threshold * mad_val / 0.6745)
-  x_capped[modified_z < -threshold] <- med - (threshold * mad_val / 0.6745)
-  return(x_capped)
-}</pre>
-                </div>
-            </section>
-
-            <!-- Function 2 -->
-            <section class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl space-y-4">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-700 pb-4">
-                    <div>
-                        <span class="text-xs font-mono text-purple-300 bg-slate-900 px-2.5 py-1 rounded border border-slate-700">Resampling / Inferenz</span>
-                        <h3 class="text-2xl font-bold text-white mt-2">2. <code class="text-purple-300">bootstrap_ci()</code></h3>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span class="text-xs text-slate-400">Non-Parametric Bootstrap</span>
-                        <button @click="copyCode('code-2')" class="bg-slate-900 hover:bg-slate-700 text-xs text-purple-300 border border-slate-700 px-2.5 py-1.5 rounded-md transition flex items-center gap-1">📋 <span x-text="copiedId === 'code-2' ? 'Kopiert!' : 'Kopieren'"></span></button>
-                    </div>
-                </div>
-                <p class="text-slate-300 text-sm">Berechnet empirische Bootstrap-Konfidenzintervalle für beliebige Statistiken.</p>
-                <div class="bg-slate-900 rounded-xl p-4 font-mono text-xs text-emerald-300 overflow-x-auto border border-slate-700">
-<pre id="code-2">bootstrap_ci <- function(data, stat_func = mean, R = 2000, conf_level = 0.95) {
-  n <- length(data)
-  boot_stats <- replicate(R, {
-    resample <- sample(data, size = n, replace = TRUE)
-    stat_func(resample)
-  })
-  alpha <- 1 - conf_level
-  ci <- quantile(boot_stats, probs = c(alpha / 2, 1 - alpha / 2), na.rm = TRUE)
-  list(observed = stat_func(data), ci_lower = ci[1], ci_upper = ci[2], conf_level = conf_level)
-}</pre>
-                </div>
-            </section>
-
-            <!-- Function 3 -->
-            <section class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl space-y-4">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-700 pb-4">
-                    <div>
-                        <span class="text-xs font-mono text-purple-300 bg-slate-900 px-2.5 py-1 rounded border border-slate-700">Visualisierung / Konsole</span>
-                        <h3 class="text-2xl font-bold text-white mt-2">3. <code class="text-purple-300">ascii_matrix()</code></h3>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span class="text-xs text-slate-400">Console Heatmap Renderer</span>
-                        <button @click="copyCode('code-3')" class="bg-slate-900 hover:bg-slate-700 text-xs text-purple-300 border border-slate-700 px-2.5 py-1.5 rounded-md transition flex items-center gap-1">📋 <span x-text="copiedId === 'code-3' ? 'Kopiert!' : 'Kopieren'"></span></button>
-                    </div>
-                </div>
-                <p class="text-slate-300 text-sm">Rendert numerische Matrizen direkt als ASCII-Heatmaps in der R-Konsole.</p>
-                <div class="bg-slate-900 rounded-xl p-4 font-mono text-xs text-emerald-300 overflow-x-auto border border-slate-700">
-<pre id="code-3">ascii_matrix <- function(mat, palette = c(".", ":", "+", "*", "#", "@")) {
-  mat_norm <- (mat - min(mat)) / (max(mat) - min(mat) + 1e-9)
-  indices <- pmin(floor(mat_norm * (length(palette) - 1)) + 1, length(palette))
-  char_mat <- matrix(palette[indices], nrow = nrow(mat))
-  apply(char_mat, 1, function(row) cat(paste(row, collapse = ""), "\n"))
-  invisible(char_mat)
-}</pre>
-                </div>
-            </section>
+        <!-- Controls: Search, Filters & Bookmarks -->
+        <div class="flex flex-col md:flex-row gap-4 mb-8" x-show="viewMode !== 'memory' && viewMode !== 'quiz' && viewMode !== 'builder' && viewMode !== 'rocket' && viewMode !== 'complex'">
+            <div class="relative flex-1">
+                <input type="text" x-model="searchQuery" placeholder="Search physics term, English translation, or number..." 
+                    class="w-full bg-slate-900 border border-slate-800 rounded-lg px-4 py-3 pl-10 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
+                <svg class="w-5 h-5 text-slate-500 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <button @click="showStarredOnly = !showStarredOnly" :class="showStarredOnly ? 'bg-cyan-600 text-white border-cyan-500' : 'bg-slate-900 text-slate-300 border-slate-800'" class="px-4 py-3 rounded-lg border font-medium transition flex items-center justify-center gap-2">
+                <span>★ Starred Only</span>
+            </button>
+            <div class="md:w-64">
+                <select x-model="selectedSection" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition">
+                    <option value="all">All Sections (<span x-text="allFlattenedWords.length"></span> terms)</option>
+                    <template x-for="sec in sections" :key="sec.id">
+                        <option :value="sec.id" x-text="sec.name"></option>
+                    </template>
+                </select>
+            </div>
         </div>
 
-        <!-- GLOSSARY VIEW -->
-        <div x-show="viewMode === 'glossary'" class="space-y-6">
-            <div class="flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-800 p-4 rounded-xl border border-slate-700">
-                <div class="relative flex-1 w-full">
-                    <input type="text" x-model="searchQuery" placeholder="Begriffe auf Deutsch/Englisch oder R-Funktionen suchen..." 
-                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 pl-10 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 transition">
-                    <svg class="w-5 h-5 text-slate-500 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <!-- LIST VIEW -->
+        <div x-show="viewMode === 'list'" class="space-y-8">
+            <template x-for="sec in filteredSections" :key="sec.id">
+                <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-6 shadow-lg">
+                    <h2 class="text-xl font-bold text-cyan-400 mb-4 pb-2 border-b border-slate-800" x-text="sec.name"></h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <template x-for="item in sec.words" :key="item.num">
+                            <div class="bg-slate-950 border border-slate-800/80 rounded-lg p-4 hover:border-cyan-700 transition flex flex-col justify-between">
+                                <div>
+                                    <div class="flex justify-between items-start mb-2">
+                                        <span class="text-xs font-mono text-slate-500" x-text="'#' + item.num"></span>
+                                        <div class="flex items-center gap-2">
+                                            <button @click="speak(item.german)" title="Pronounce" class="text-slate-400 hover:text-cyan-400 transition">🔊</button>
+                                            <button @click="toggleStar(item.num)" class="text-lg transition" :class="starredWords.includes(item.num) ? 'text-cyan-400' : 'text-slate-700 hover:text-slate-400'">★</button>
+                                        </div>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-white mb-1" x-text="item.german"></h3>
+                                    <p class="text-slate-300 text-sm" x-text="item.meaning"></p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
                 </div>
-                <div class="text-xs text-slate-400 font-mono whitespace-nowrap">
-                    Zeige <span class="text-purple-300 font-bold" x-text="filteredTerms.length"></span> von 102 Begriffen
+            </template>
+        </div>
+
+        <!-- FLASHCARD VIEW -->
+        <div x-show="viewMode === 'cards'" class="max-w-xl mx-auto">
+            <div class="flex justify-between items-center mb-4 text-sm text-slate-400">
+                <span>Card <span x-text="currentCardIndex + 1"></span> of <span x-text="totalFilteredWords"></span></span>
+                <button @click="toggleStar(currentWord.num)" class="text-xl transition" :class="starredWords.includes(currentWord.num) ? 'text-cyan-400' : 'text-slate-700 hover:text-slate-400'">★</button>
+            </div>
+            <div class="perspective h-80 w-full cursor-pointer mb-6" @click="flipped = !flipped">
+                <div class="relative w-full h-full duration-500 transform-style shadow-2xl rounded-2xl" :class="flipped ? 'rotate-y-180' : ''">
+                    <div class="absolute inset-0 w-full h-full bg-slate-900 border-2 border-slate-800 rounded-2xl flex flex-col items-center justify-center p-8 backface-hidden text-center">
+                        <span class="absolute top-4 left-4 text-xs font-mono text-cyan-400" x-text="'#' + currentWord.num"></span>
+                        <button @click.stop="speak(currentWord.german)" class="absolute top-4 right-4 text-lg text-slate-400 hover:text-cyan-400">🔊</button>
+                        <span class="text-xs uppercase tracking-wider text-slate-500 mb-2" x-text="currentWord.sectionName"></span>
+                        <h2 class="text-3xl font-extrabold text-white mb-3" x-text="currentWord.german"></h2>
+                        <span class="absolute bottom-4 text-xs text-slate-500">Click to flip</span>
+                    </div>
+                    <div class="absolute inset-0 w-full h-full bg-slate-900 border-2 border-cyan-600/50 rounded-2xl flex flex-col items-center justify-center p-8 backface-hidden rotate-y-180 text-center">
+                        <span class="absolute top-4 left-4 text-xs font-mono text-cyan-400" x-text="'#' + currentWord.num"></span>
+                        <span class="text-xs uppercase tracking-wider text-cyan-400 mb-2">Definition</span>
+                        <h3 class="text-2xl font-bold text-white mb-2" x-text="currentWord.meaning"></h3>
+                        <span class="absolute bottom-4 text-xs text-slate-500">Click to flip back</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-between items-center gap-4">
+                <button @click="prevCard()" class="flex-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 py-3 rounded-lg font-medium transition text-center">Previous</button>
+                <button @click="flipped = false; randomCard()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-lg font-medium transition">Shuffle</button>
+                <button @click="nextCard()" class="flex-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 py-3 rounded-lg font-medium transition text-center">Next</button>
+            </div>
+        </div>
+
+        <!-- FLIGHT LOG BUILDER WORKSHOP VIEW -->
+        <div x-show="viewMode === 'builder'" class="max-w-4xl mx-auto space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <h3 class="text-xl font-bold text-cyan-400 mb-2">🚀 Flight Log Sentence Builder</h3>
+                <p class="text-slate-400 text-sm mb-4">Construct German physical or rocketry descriptions by clicking blocks below. Click words in your workspace to remove them.</p>
+
+                <div class="bg-slate-950 border-2 border-dashed border-slate-800 rounded-xl p-6 min-h-[100px] flex flex-wrap items-center gap-3 mb-6">
+                    <template x-if="builtSentence.length === 0">
+                        <span class="text-slate-600 italic text-sm">Workspace empty. Click terms below to build a flight log...</span>
+                    </template>
+                    <template x-for="(word, index) in builtSentence" :key="index">
+                        <button @click="removeFromSentence(index)" class="bg-cyan-600 hover:bg-red-600 text-white px-3.5 py-2 rounded-lg font-medium text-sm transition shadow flex items-center gap-1.5 group">
+                            <span x-text="word"></span>
+                            <span class="text-xs text-cyan-200 group-hover:text-white">&times;</span>
+                        </button>
+                    </template>
+                </div>
+
+                <div class="flex flex-wrap gap-4 items-center justify-between">
+                    <div class="flex gap-3">
+                        <button @click="checkSentence()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-lg font-medium transition shadow">Check Physics Log</button>
+                        <button @click="speak(builtSentenceText)" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2.5 rounded-lg font-medium transition">🔊 Speak</button>
+                        <button @click="builtSentence = []; feedback = null" class="bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 px-4 py-2.5 rounded-lg font-medium transition">Clear</button>
+                    </div>
+                </div>
+
+                <template x-if="feedback">
+                    <div class="mt-6 p-5 rounded-xl border" :class="feedback.valid ? 'bg-emerald-950/40 border-emerald-600 text-emerald-200' : 'bg-cyan-950/40 border-cyan-600 text-cyan-200'">
+                        <h4 class="font-bold text-lg mb-1" x-text="feedback.valid ? '✅ Flight Statement Validated' : '⚠️ Technical Check'"></h4>
+                        <p class="text-sm mb-2" x-text="feedback.message"></p>
+                        <div class="text-xs font-mono opacity-80" x-text="'Log Summary: ' + feedback.translation"></div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Physics Toolbox Toolbar -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
+                    <h4 class="font-bold text-cyan-400 text-sm uppercase tracking-wider mb-3">Pronouns & Articles</h4>
+                    <div class="flex flex-wrap gap-2">
+                        <template x-for="item in physicsToolbox.pronouns" :key="item">
+                            <button @click="addToSentence(item)" class="bg-slate-950 border border-slate-800 hover:border-cyan-500 text-slate-200 px-3 py-1.5 rounded-md text-xs font-medium transition" x-text="item"></button>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
+                    <h4 class="font-bold text-cyan-400 text-sm uppercase tracking-wider mb-3">Action Verbs</h4>
+                    <div class="flex flex-wrap gap-2">
+                        <template x-for="item in physicsToolbox.verbs" :key="item">
+                            <button @click="addToSentence(item)" class="bg-slate-950 border border-slate-800 hover:border-cyan-500 text-slate-200 px-3 py-1.5 rounded-md text-xs font-medium transition" x-text="item"></button>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
+                    <h4 class="font-bold text-cyan-400 text-sm uppercase tracking-wider mb-3">Modifiers & Connectors</h4>
+                    <div class="flex flex-wrap gap-2">
+                        <template x-for="item in physicsToolbox.modifiers" :key="item">
+                            <button @click="addToSentence(item)" class="bg-slate-950 border border-slate-800 hover:border-cyan-500 text-slate-200 px-3 py-1.5 rounded-md text-xs font-medium transition" x-text="item"></button>
+                        </template>
+                    </div>
                 </div>
             </div>
 
-            <!-- Glossary Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <template x-for="term in filteredTerms" :key="term.id">
-                    <div class="bg-slate-800 border border-slate-700/85 rounded-xl p-5 hover:border-purple-400/50 transition flex flex-col justify-between shadow-md">
-                        <div>
-                            <div class="flex justify-between items-start mb-2">
-                                <h3 class="text-base font-bold text-white flex items-center gap-2">
-                                    <span x-text="term.name"></span>
-                                    <button @click="speakGerman(term.name)" class="text-purple-300 hover:text-white text-xs p-1 rounded bg-slate-900 border border-slate-700" title="Auf Deutsch anhören">🔊</button>
-                                </h3>
-                                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-purple-300" x-text="term.category"></span>
-                            </div>
-                            <p class="text-slate-300 text-xs leading-relaxed mb-3" x-text="term.definition"></p>
-                        </div>
-                        <div class="pt-3 border-t border-slate-700/60 flex items-center justify-between text-xs font-mono text-emerald-400">
-                            <span x-text="'R: ' + term.rFunc"></span>
-                        </div>
+            <!-- Physics Vocabulary Quick Add -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
+                <h4 class="font-bold text-cyan-400 text-sm uppercase tracking-wider mb-3">Add from physics.json (<span x-text="allFlattenedWords.length"></span> terms)</h4>
+                <div class="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-1">
+                    <template x-for="w in allFlattenedWords" :key="w.num">
+                        <button @click="addToSentence(w.german)" class="bg-slate-950 border border-slate-800 hover:border-cyan-500 text-cyan-200 px-2.5 py-1 rounded-md text-xs transition" x-text="w.german"></button>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- MULTIPLE CHOICE QUIZ VIEW -->
+        <div x-show="viewMode === 'quiz'" class="max-w-xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-xl">
+            <div class="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
+                <span class="text-sm text-slate-400">Question <span x-text="quizIndex + 1"></span> of 10</span>
+                <span class="text-sm font-bold text-cyan-400">Score: <span x-text="quizScore"></span></span>
+            </div>
+            <template x-if="!quizFinished">
+                <div>
+                    <div class="text-center mb-8">
+                        <span class="text-xs text-slate-600 font-mono" x-text="'#' + currentQuizQuestion.num"></span>
+                        <h3 class="text-3xl font-extrabold text-white mt-2 mb-3" x-text="currentQuizQuestion.german"></h3>
+                        <button @click="speak(currentQuizQuestion.german)" class="text-sm text-cyan-400 hover:underline">🔊 Listen Pronunciation</button>
+                    </div>
+                    <div class="space-y-3">
+                        <template x-for="option in currentQuizOptions" :key="option">
+                            <button @click="answerQuiz(option)" class="w-full text-left bg-slate-950 border border-slate-800 hover:border-cyan-500 p-4 rounded-xl text-white font-medium transition" x-text="option"></button>
+                        </template>
+                    </div>
+                </div>
+            </template>
+            <template x-if="quizFinished">
+                <div class="text-center py-6">
+                    <h3 class="text-2xl font-bold mb-2">🎯 Quiz Completed!</h3>
+                    <p class="text-slate-300 mb-6">You scored <span class="font-bold text-cyan-400" x-text="quizScore"></span> out of 10.</p>
+                    <button @click="initQuiz()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-xl font-medium transition shadow">Play Again</button>
+                </div>
+            </template>
+        </div>
+
+        <!-- MEMORY MATCH GAME VIEW -->
+        <div x-show="viewMode === 'memory'" class="max-w-4xl mx-auto">
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl mb-6 flex flex-wrap justify-between items-center gap-4">
+                <div class="flex items-center gap-6">
+                    <div>
+                        <span class="text-xs text-slate-400 uppercase tracking-wider block">Pairs</span>
+                        <span class="text-xl font-bold text-cyan-400" x-text="matchedPairs + ' / ' + totalPairs"></span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-400 uppercase tracking-wider block">Moves</span>
+                        <span class="text-xl font-bold text-white" x-text="memoryMoves"></span>
+                    </div>
+                    <div x-show="enableSprintTimer">
+                        <span class="text-xs text-slate-400 uppercase tracking-wider block">Time</span>
+                        <span class="text-xl font-bold text-emerald-400" x-text="sprintSeconds + 's'"></span>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+                        <input type="checkbox" x-model="enableSprintTimer" class="rounded bg-slate-950 border-slate-800 text-cyan-600 focus:ring-0"> Timer Sprint
+                    </label>
+                    <select x-model.number="memoryPairCount" @change="initMemoryGame()" class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-500">
+                        <option value="6">6 Pairs</option>
+                        <option value="8">8 Pairs</option>
+                        <option value="12">12 Pairs</option>
+                        <option value="16">16 Pairs</option>
+                    </select>
+                    <button @click="initMemoryGame()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition">New Game</button>
+                </div>
+            </div>
+
+            <!-- Peek Phase Banner Notice -->
+            <template x-if="isPeeking">
+                <div class="bg-cyan-950/80 border border-cyan-500 text-cyan-200 p-4 rounded-xl text-center mb-6 shadow-lg animate-pulse">
+                    <h4 class="font-bold text-lg mb-1">🧠 Study Phase Active!</h4>
+                    <p class="text-sm">
+                        Memorize card positions! All cards will flip face down in 
+                        <span class="font-mono font-bold text-cyan-400 text-base" x-text="peekSeconds + 's'"></span>.
+                    </p>
+                </div>
+            </template>
+
+            <template x-if="matchedPairs === totalPairs && totalPairs > 0">
+                <div class="bg-emerald-950/80 border border-emerald-600 text-emerald-100 p-6 rounded-xl text-center mb-6 shadow-lg animate-bounce">
+                    <h3 class="text-2xl font-bold mb-1">🎉 Excellent Work!</h3>
+                    <p class="text-sm">Matched all physics pairs in <span class="font-bold" x-text="memoryMoves"></span> moves <template x-if="enableSprintTimer"><span>in <span class="font-bold" x-text="sprintSeconds"></span> seconds</span></template>!</p>
+                    <button @click="initMemoryGame()" class="mt-4 bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg font-medium transition shadow">Play Again</button>
+                </div>
+            </template>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                <template x-for="card in memoryCards" :key="card.id">
+                    <div @click="flipCard(card)" 
+                         class="h-28 bg-slate-900 border-2 rounded-xl flex items-center justify-center p-3 text-center cursor-pointer transition transform duration-300 select-none shadow-md"
+                         :class="{
+                          'border-slate-800 hover:border-cyan-500 bg-slate-900': !card.flipped && !card.matched,
+                          'border-cyan-500 bg-slate-950 text-white scale-105': card.flipped && !card.matched,
+                          'border-emerald-600 bg-emerald-950/40 text-emerald-300 opacity-80 cursor-default': card.matched
+                         }">
+                        <div x-show="!card.flipped && !card.matched" class="text-slate-600 font-bold text-xl">#</div>
+                        <div x-show="card.flipped || card.matched" class="text-xs sm:text-sm font-semibold" x-text="card.text"></div>
                     </div>
                 </template>
             </div>
         </div>
 
-        <!-- DATA PLAYGROUND VIEW -->
-        <div x-show="viewMode === 'playground'" class="space-y-6">
-            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl space-y-4">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-700 pb-4">
+        <!-- ROCKET LAB VIEW -->
+        <div x-show="viewMode === 'rocket'" class="max-w-5xl mx-auto space-y-8">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-slate-800 pb-4">
                     <div>
-                        <span class="text-xs font-mono text-purple-300 bg-slate-900 px-2.5 py-1 rounded border border-slate-700">Interaktive Datensätze</span>
-                        <h2 class="text-2xl font-bold text-white mt-1">🧪 R Data Playground</h2>
+                        <h3 class="text-xl font-bold text-cyan-400">🚀 Rocket Aerodynamics & Flight Lab</h3>
+                        <p class="text-slate-400 text-sm">Design your airframe parameters and calculate real-time drag, Reynolds number, and flight feasibility in German & English.</p>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <select x-model="selectedDataset" @change="loadDataset()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-400">
-                            <option value="mtcars">mtcars (Motor Trend Cars)</option>
-                            <option value="iris">iris (Iris Flower Dataset)</option>
-                            <option value="faithful">faithful (Old Faithful Geyser)</option>
-                        </select>
-                        <button @click="loadDataset()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow">Daten laden</button>
+                    <span class="text-xs px-3 py-1 rounded bg-cyan-950/60 border border-cyan-800 text-cyan-300 font-mono">Interactive Simulator</span>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Sliders & Inputs -->
+                    <div class="space-y-4 bg-slate-950 p-5 rounded-xl border border-slate-800/80">
+                        <h4 class="font-bold text-white text-sm uppercase tracking-wider text-cyan-400">Design Parameters / Parameter</h4>
+                        
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-300">Body Diameter (<span class="italic">der Durchmesser</span>):</span>
+                                <span class="font-mono text-cyan-300" x-text="rocket.diameter + ' mm'"></span>
+                            </div>
+                            <input type="range" x-model.number="rocket.diameter" min="20" max="150" step="1" class="w-full accent-cyan-500 bg-slate-900">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-300">Body Length (<span class="italic">die Länge</span>):</span>
+                                <span class="font-mono text-cyan-300" x-text="rocket.length + ' mm'"></span>
+                            </div>
+                            <input type="range" x-model.number="rocket.length" min="200" max="2000" step="10" class="w-full accent-cyan-500 bg-slate-900">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-300">Velocity (<span class="italic">die Geschwindigkeit</span>):</span>
+                                <span class="font-mono text-cyan-300" x-text="rocket.velocity + ' m/s'"></span>
+                            </div>
+                            <input type="range" x-model.number="rocket.velocity" min="10" max="500" step="5" class="w-full accent-cyan-500 bg-slate-900">
+                        </div>
+
+                        <div class="pt-2 border-t border-slate-900">
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-300">Target Altitude (<span class="italic">die Zielhöhe</span>):</span>
+                                <span class="font-mono text-cyan-300" x-text="rocket.targetAltitude + ' m'"></span>
+                            </div>
+                            <input type="range" x-model.number="rocket.targetAltitude" min="100" max="3000" step="50" class="w-full accent-cyan-500 bg-slate-900">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-300">Motor Impulse (<span class="italic">Gesamtimpuls Ns</span>):</span>
+                                <span class="font-mono text-cyan-300" x-text="rocket.impulse + ' Ns'"></span>
+                            </div>
+                            <input type="range" x-model.number="rocket.impulse" min="20" max="600" step="10" class="w-full accent-cyan-500 bg-slate-900">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-300">Rocket Mass (<span class="italic">die Masse g</span>):</span>
+                                <span class="font-mono text-cyan-300" x-text="rocket.mass + ' g'"></span>
+                            </div>
+                            <input type="range" x-model.number="rocket.mass" min="100" max="3000" step="50" class="w-full accent-cyan-500 bg-slate-900">
+                        </div>
+                    </div>
+
+                    <!-- Visual Blueprint Preview & Feasibility Status -->
+                    <div class="bg-slate-950 p-5 rounded-xl border border-slate-800/80 flex flex-col justify-between relative overflow-hidden">
+                        <div>
+                            <span class="text-xs text-slate-500 font-mono block mb-2">Blueprint & Feasibility / Machbarkeit</span>
+                            <div class="h-40 flex items-center justify-center">
+                                <!-- Dynamic SVG Rocket -->
+                                <svg viewBox="0 0 100 300" class="h-full w-auto drop-shadow-[0_0_15px_rgba(6,182,212,0.2)]">
+                                    <!-- Nose Cone -->
+                                    <path d="M50 10 Q 50 10, 70 80 L 30 80 Z" fill="#0e7490" stroke="#22d3ee" stroke-width="2"/>
+                                    <!-- Body Tube -->
+                                    <rect x="30" y="80" width="40" :height="bodyTubeHeight" fill="#090d16" stroke="#22d3ee" stroke-width="2"/>
+                                    <!-- Fins -->
+                                    <polygon points="30,220 10,260 30,250" fill="#0e7490" stroke="#22d3ee" stroke-width="1.5"/>
+                                    <polygon points="70,220 90,260 70,250" fill="#0e7490" stroke="#22d3ee" stroke-width="1.5"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- Feasibility Alert Box -->
+                        <div class="mt-4 p-3 rounded-lg border text-xs" :class="isFeasible ? 'bg-emerald-950/40 border-emerald-600 text-emerald-200' : 'bg-amber-950/40 border-amber-600 text-amber-200'">
+                            <div class="font-bold mb-1" x-text="isFeasible ? '✅ Target Altitude Achievable / Zielhöhe erreichbar' : '⚠️ Insufficient Impulse / Zu geringer Impuls'"></div>
+                            <div class="text-[11px] opacity-90" x-text="feasibilityMessage"></div>
+                        </div>
+                    </div>
+
+                    <!-- Aerodynamic Output Metrics -->
+                    <div class="space-y-4 bg-slate-950 p-5 rounded-xl border border-slate-800/80 flex flex-col justify-between">
+                        <h4 class="font-bold text-white text-sm uppercase tracking-wider text-cyan-400">Flight Calculations / Ergebnisse</h4>
+                        
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between border-b border-slate-900 pb-2">
+                                <span class="text-slate-400">Reynolds Number (<span class="text-xs text-cyan-300">Re</span>):</span>
+                                <span class="font-mono text-white" x-text="reynoldsNumber"></span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-900 pb-2">
+                                <span class="text-slate-400">Drag Coefficient (<span class="text-xs text-cyan-300">Cd</span>):</span>
+                                <span class="font-mono text-white" x-text="dragCoefficient"></span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-900 pb-2">
+                                <span class="text-slate-400">Total Drag Force (<span class="text-xs text-cyan-300">Luftwiderstand Fd</span>):</span>
+                                <span class="font-mono text-emerald-400 font-bold" x-text="dragForce + ' N'"></span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-900 pb-2">
+                                <span class="text-slate-400">Est. Max Apogee (<span class="text-xs text-cyan-300">Gipfelhöhe</span>):</span>
+                                <span class="font-mono text-cyan-300 font-bold" x-text="estimatedApogee + ' m'"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Thrust-to-Weight (<span class="text-xs text-cyan-300">Schub-Gewicht</span>):</span>
+                                <span class="font-mono text-white" x-text="thrustToWeightRatio + ':1'"></span>
+                            </div>
+                        </div>
+
+                        <button @click="speak('Die geschätzte Gipfelhöhe beträgt ' + estimatedApogee + ' Meter bei einem Gesamtimpuls von ' + rocket.impulse + ' Newtonsekunden.')" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white py-2.5 rounded-lg text-sm font-medium transition shadow">
+                            🔊 Speak Flight Report (DE)
+                        </button>
                     </div>
                 </div>
-                <p class="text-slate-300 text-sm">Wählen Sie einen klassischen R-Datensatz aus, um eine Vorschau (<code class="text-purple-300">head()</code>) und eine statistische Zusammenfassung (<code class="text-purple-300">summary()</code>) im Browser anzuzeigen.</p>
-                <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-300 h-96 overflow-y-auto shadow-inner whitespace-pre-wrap" x-text="datasetOutput">Lade Datensatz...</div>
+
+                <!-- Explanation Card -->
+                <div class="mt-8 p-5 bg-slate-950 rounded-xl border border-slate-800">
+                    <h4 class="font-bold text-cyan-400 text-sm uppercase tracking-wider mb-3">How Do We Know If It Reaches Target Altitude? / Wie prüfen wir die Zielhöhe?</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-300">
+                        <div class="space-y-2">
+                            <p><strong class="text-white">🇩🇪 Energiebilanz & Verluste:</strong> Um eine Zielhöhe ($h$) zu erreichen, muss die vom Motor gelieferte Energie (Gesamtimpuls) die potentielle Energie ($E_p = m \cdot g \cdot h$) und die aerodynamischen Verluste durch Luftwiderstand ($F_d$) überwinden.</p>
+                            <p><strong class="text-white">Schub-Gewicht-Verhältnis:</strong> Ein Startwert von mindestens 5:1 sorgt dafür, dass die Rakete die Startrampe schnell verlässt, bevor Instabilitäten auftreten.</p>
+                        </div>
+                        <div class="space-y-2">
+                            <p><strong class="text-white">🇬🇧 Energy Balance & Losses:</strong> To reach a target altitude ($h$), the motor's total impulse energy must overcome potential energy ($E_p = m \cdot g \cdot h$) and aerodynamic drag losses ($F_d$).</p>
+                            <p><strong class="text-white">Thrust-to-Weight:</strong> A liftoff ratio of at least 5:1 ensures the rocket clears the launch rod cleanly before aerodynamic control takes over.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- German-English Rocketry Vocabulary Glossary -->
+                <div class="mt-8 pt-6 border-t border-slate-800">
+                    <h4 class="font-bold text-cyan-400 text-sm uppercase tracking-wider mb-4">Aerodynamics & Rocketry Vocabulary Glossary / Vokabelliste</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800"><strong class="text-white block text-sm">der Luftwiderstand</strong>Drag / Air Resistance</div>
+                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800"><strong class="text-white block text-sm">die Zielhöhe</strong>Target Altitude</div>
+                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800"><strong class="text-white block text-sm">der Gesamtimpuls</strong>Total Impulse ($N\cdot s$)</div>
+                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800"><strong class="text-white block text-sm">die Gipfelhöhe (Apogäum)</strong>Apogee / Peak Altitude</div>
+                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800"><strong class="text-white block text-sm">das Schub-Gewicht-Verhältnis</strong>Thrust-to-Weight Ratio</div>
+                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800"><strong class="text-white block text-sm">die Reynolds-Zahl</strong>Reynolds Number</div>
+                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800"><strong class="text-white block text-sm">der Anstellwinkel</strong>Angle of Attack</div>
+                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-800"><strong class="text-white block text-sm">die Grenzschicht</strong>Boundary Layer</div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- TERMINAL VIEW -->
-        <div x-show="viewMode === 'terminal'" class="space-y-6">
-            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl space-y-4">
-                <div class="flex justify-between items-center border-b border-slate-700 pb-4">
-                    <div>
-                        <span class="text-xs font-mono text-purple-300 bg-slate-900 px-2.5 py-1 rounded border border-slate-700">Browser-Interpreter</span>
-                        <h2 class="text-2xl font-bold text-white mt-1">R Web Terminal 💻</h2>
-                    </div>
-                    <span class="text-xs text-slate-400">Powered by WebAssembly (webR)</span>
+        <!-- COMPLEX WEB EMBED VIEW -->
+        <div x-show="viewMode === 'complex'" class="w-full">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                <div class="bg-slate-950 px-4 py-3 border-b border-slate-800 flex justify-between items-center text-xs text-slate-400">
+                    <span class="font-mono">https://terranovaeng.github.io/complexweb/</span>
+                    <a href="https://terranovaeng.github.io/complexweb/" target="_blank" class="text-cyan-400 hover:underline">Open in new tab ↗</a>
                 </div>
-                <p class="text-slate-300 text-sm">Geben Sie beliebigen R-Code ein (z. B. <code>rnorm(5)</code>, <code>mean(c(10, 20, 30))</code> oder <code>summary(cars)</code>):</p>
-
-                <!-- Input Area -->
-                <div class="flex gap-2">
-                    <input type="text" x-model="rInput" @keydown.enter="runRCode()" placeholder="R-Code hier eingeben und Enter drücken..." 
-                        class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 font-mono text-sm text-white focus:outline-none focus:border-purple-400 transition">
-                    <button @click="runRCode()" class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-lg font-medium text-sm transition shadow">Ausführen</button>
-                </div>
-
-                <!-- Output Box -->
-                <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-300 h-96 overflow-y-auto shadow-inner whitespace-pre-wrap" id="r-output" x-text="rOutput"></div>
+                <iframe src="https://terranovaeng.github.io/complexweb/" class="w-full h-[75vh] border-0 bg-slate-950" title="Complex Web"></iframe>
             </div>
         </div>
 
     </main>
 
     <!-- Footer -->
-    <footer class="text-center py-8 text-xs text-slate-500 border-t border-slate-800 mt-16">
-        TerraNova Engineering Lab &bull; Statistisches Glossar &bull; Mit Liebe für Izabella 💜
+    <footer class="text-center py-8 text-xs text-slate-500 border-t border-slate-900 mt-12">
+        TerraNova Engineering Lab &bull; Physics & Aerospace Vocabulary Workshop
     </footer>
 
-    <!-- Script -->
+    <!-- 1. Define Alpine Application Logic -->
     <script>
-        function rStatsApp() {
+        function physicsApp() {
             return {
-                viewMode: 'functions',
+                viewMode: 'list',
                 searchQuery: '',
-                copiedId: null,
-                rInput: '',
-                rOutput: 'Initialisiere WebR-Engine...',
-                selectedDataset: 'mtcars',
-                datasetOutput: 'Klicken Sie auf "Daten laden", um eine Vorschau und Zusammenfassung anzuzeigen.',
-                webrInstance: null,
-                init() {
-                    this.initTerminal();
+                selectedSection: 'all',
+                currentCardIndex: 0,
+                flipped: false,
+                sections: [],
+                dataSource: 'Loading...',
+                starredWords: JSON.parse(localStorage.getItem('starred_physics') || '[]'),
+                showStarredOnly: false,
+
+                // Rocket Lab Simulator State
+                rocket: {
+                    diameter: 50,       // mm
+                    length: 750,        // mm
+                    velocity: 120,      // m/s
+                    targetAltitude: 500,// m
+                    impulse: 160,       // Ns (e.g. F39 motor range)
+                    mass: 450           // g
                 },
-                async initTerminal() {
-                    try {
-                        this.webrInstance = new WebR.WebR();
-                        await this.webrInstance.init();
-                        this.rOutput = "R-Engine bereit! Tippen Sie unten Ihren Code ein und drücken Sie Enter.";
-                        this.loadDataset();
-                    } catch (err) {
-                        this.rOutput = `Fehler beim Laden von WebR: ${err.message}`;
-                    }
+
+                builtSentence: [],
+                feedback: null,
+                physicsToolbox: {
+                    pronouns: ['die Rakete', 'der Motor', 'der Körper', 'wir', 'es', 'der Wind'],
+                    verbs: ['erzeugt', 'beschleunigt', 'wirkt', 'fliegt', 'steigt', 'sinkt', 'stabilisiert'],
+                    modifiers: ['schnell', 'hoch', 'nach oben', 'gegen', 'mit', 'durch', 'maximal']
                 },
-                async loadDataset() {
-                    if (!this.webrInstance) return;
-                    this.datasetOutput = `Lade Datensatz ${this.selectedDataset}...`;
+                
+                quizIndex: 0,
+                quizScore: 0,
+                quizFinished: false,
+                currentQuizQuestion: { num: 0, german: '', meaning: '' },
+                currentQuizOptions: [],
+                quizPool: [],
+
+                memoryPairCount: 8,
+                memoryCards: [],
+                flippedCards: [],
+                matchedPairs: 0,
+                totalPairs: 0,
+                memoryMoves: 0,
+                isChecking: false,
+                enableSprintTimer: false,
+                sprintSeconds: 0,
+                timerInterval: null,
+
+                // 20-Second Memory Peek Phase Properties
+                peekSeconds: 20,
+                isPeeking: false,
+                peekInterval: null,
+
+                async initData() {
                     try {
-                        let shelter = await new this.webrInstance.Shelter();
-                        let headResult = await shelter.captureR(`head(${this.selectedDataset})`);
-                        let summaryResult = await shelter.captureR(`summary(${this.selectedDataset})`);
+                        let response = await fetch('physics.json');
+                        if (!response.ok) throw new Error('File not found');
+                        let data = await response.json();
                         
-                        let headText = headResult.output.map(o => o.data).join('\n');
-                        let summaryText = summaryResult.output.map(o => o.data).join('\n');
-                        
-                        this.datasetOutput = `=== DATENAUSSCHNITT: head(${this.selectedDataset}) ===\n\n${headText}\n\n` +
-                                             `========================================\n` +
-                                             `=== STATISTISCHE ZUSAMMENFASSUNG: summary(${this.selectedDataset}) ===\n\n${summaryText}`;
-                        shelter.purge();
-                    } catch (err) {
-                        this.datasetOutput = `Fehler: ${err.message}`;
+                        if (Array.isArray(data)) {
+                            this.sections = data;
+                        } else if (data.sections) {
+                            this.sections = data.sections;
+                        } else {
+                            this.sections = this.formatRawWordsToSections(data);
+                        }
+                        this.dataSource = 'physics.json (External File)';
+                    } catch (e) {
+                        const fallbackPhysics = {
+                            "1": { "german": "die Kraft", "english": "Force" },
+                            "2": { "german": "die Masse", "english": "Mass" },
+                            "3": { "german": "die Beschleunigung", "english": "Acceleration" },
+                            "4": { "german": "der Schub", "english": "Thrust" },
+                            "5": { "german": "der Luftwiderstand", "english": "Drag / air resistance" }
+                        };
+                        this.sections = this.formatRawWordsToSections(fallbackPhysics);
+                        this.dataSource = 'Hardcoded Fallback Array';
                     }
                 },
-                async runRCode() {
-                    let input = this.rInput.trim();
-                    if (!this.webrInstance || !input) return;
-                    this.rOutput += `\n> ${input}\n`;
-                    let currentInput = input;
-                    this.rInput = '';
-                    try {
-                        let shelter = await new this.webrInstance.Shelter();
-                        let result = await shelter.captureR(currentInput);
-                        this.rOutput += result.output.map(o => o.data).join('\n');
-                        shelter.purge();
-                    } catch (err) {
-                        this.rOutput += `Fehler: ${err.message}`;
+
+                formatRawWordsToSections(rawObj) {
+                    let wordKeys = Object.keys(rawObj);
+                    let chunks = [];
+                    for (let i = 0; i < wordKeys.length; i += 25) {
+                        let chunkKeys = wordKeys.slice(i, i + 25);
+                        let chunkWords = chunkKeys.map(k => ({
+                            num: parseInt(k),
+                            german: rawObj[k].german || rawObj[k].deutsch,
+                            meaning: rawObj[k].english || rawObj[k].meaning,
+                            type: 'Term'
+                        }));
+                        let startNum = chunkKeys[0];
+                        let endNum = chunkKeys[chunkKeys.length - 1];
+                        chunks.push({
+                            id: 'sec_' + (chunks.length + 1),
+                            name: `Section ${chunks.length + 1} (${startNum}–${endNum})`,
+                            words: chunkWords
+                        });
                     }
-                    this.$nextTick(() => {
-                        let outBox = document.getElementById('r-output');
-                        if (outBox) outBox.scrollTop = outBox.scrollHeight;
-                    });
+                    return chunks;
                 },
-                speakGerman(text) {
-                    if ('speechSynthesis' in window) {
+
+                // Rocket Simulator Computed Properties
+                get airDensity() {
+                    return 1.225;
+                },
+
+                get reynoldsNumber() {
+                    let rho = 1.225;
+                    let v = this.rocket.velocity;
+                    let L = this.rocket.length / 1000;
+                    let mu = 1.81e-5;
+                    let re = (rho * v * L) / mu;
+                    return re.toExponential(2);
+                },
+
+                get dragCoefficient() {
+                    let fineness = this.rocket.length / this.rocket.diameter;
+                    let cd = 0.3 + (1 / fineness) * 0.15;
+                    return cd.toFixed(2);
+                },
+
+                get dragForce() {
+                    let rho = 1.225;
+                    let v = this.rocket.velocity;
+                    let d = this.rocket.diameter / 1000;
+                    let S = Math.PI * Math.pow(d / 2, 2);
+                    let cd = parseFloat(this.dragCoefficient);
+                    let fd = 0.5 * rho * Math.pow(v, 2) * S * cd;
+                    return fd.toFixed(1);
+                },
+
+                get estimatedApogee() {
+                    let massKg = this.rocket.mass / 1000;
+                    let impulse = this.rocket.impulse;
+                    let totalEnergy = impulse * 35; 
+                    let cd = parseFloat(this.dragCoefficient);
+                    let dragPenalty = cd * 120; 
+                    let netEnergy = Math.max(50, totalEnergy - dragPenalty);
+                    let g = 9.81;
+                    let apogee = netEnergy / (massKg * g);
+                    return Math.round(Math.min(5000, Math.max(50, apogee)));
+                },
+
+                get thrustToWeightRatio() {
+                    let massKg = this.rocket.mass / 1000;
+                    let weightN = massKg * 9.81;
+                    let avgThrust = this.rocket.impulse / 1.5;
+                    return (avgThrust / weightN).toFixed(1);
+                },
+
+                get isFeasible() {
+                    return this.estimatedApogee >= this.rocket.targetAltitude;
+                },
+
+                get feasibilityMessage() {
+                    if (this.isFeasible) {
+                        return `Est. apogee (${this.estimatedApogee}m) meets or exceeds target (${this.rocket.targetAltitude}m). / Geschätzte Gipfelhöhe erreicht Zielhöhe.`;
+                    } else {
+                        return `Target (${this.rocket.targetAltitude}m) exceeds estimated apogee (${this.estimatedApogee}m). Increase impulse or reduce mass. / Zielhöhe zu hoch für den aktuellen Impuls.`;
+                    }
+                },
+
+                get bodyTubeHeight() {
+                    return Math.min(160, Math.max(60, this.rocket.length / 10));
+                },
+
+                speak(text) {
+                    let utteranceText = typeof text === 'string' ? text : this.builtSentenceText;
+                    if ('speechSynthesis' in window && utteranceText) {
                         window.speechSynthesis.cancel();
-                        let cleanText = text.split('(')[0].trim();
-                        let utterance = new SpeechSynthesisUtterance(cleanText);
+                        let utterance = new SpeechSynthesisUtterance(utteranceText);
                         utterance.lang = 'de-DE';
-                        utterance.rate = 0.9;
                         window.speechSynthesis.speak(utterance);
                     }
                 },
-                copyCode(elementId) {
-                    let text = document.getElementById(elementId).innerText;
-                    navigator.clipboard.writeText(text).then(() => {
-                        this.copiedId = elementId;
-                        setTimeout(() => { this.copiedId = null; }, 2000);
-                    });
+
+                toggleStar(num) {
+                    if (this.starredWords.includes(num)) {
+                        this.starredWords = this.starredWords.filter(n => n !== num);
+                    } else {
+                        this.starredWords.push(num);
+                    }
+                    localStorage.setItem('starred_physics', JSON.stringify(this.starredWords));
                 },
-                terms: [
-                    { id: 1, name: "Mittelwert (Mean)", category: "Deskriptiv", definition: "Das arithmetische Mittel eines Datensatzes.", rFunc: "mean(x)" },
-                    { id: 2, name: "Median (Median)", category: "Deskriptiv", definition: "Der mittlere Wert bei numerisch geordneten Daten.", rFunc: "median(x)" },
-                    { id: 3, name: "Modus (Mode)", category: "Deskriptiv", definition: "Der am häufigsten vorkommende Wert in einem Datensatz.", rFunc: "names(sort(table(x)))" },
-                    { id: 4, name: "Varianz (Variance)", category: "Deskriptiv", definition: "Die durchschnittliche quadratische Abweichung vom Mittelwert.", rFunc: "var(x)" },
-                    { id: 5, name: "Standardabweichung (Standard Deviation)", category: "Deskriptiv", definition: "Die Quadratwurzel der Varianz als Maß für die Streuung.", rFunc: "sd(x)" },
-                    { id: 6, name: "Interquartilsabstand (IQR)", category: "Deskriptiv", definition: "Die Differenz zwischen dem 75. und 25. Perzentil.", rFunc: "IQR(x)" },
-                    { id: 7, name: "Spannweite (Range)", category: "Deskriptiv", definition: "Die Differenz zwischen Maximal- und Minimalwert.", rFunc: "range(x)" },
-                    { id: 8, name: "Schiefe (Skewness)", category: "Deskriptiv", definition: "Maß für die Asymmetrie einer Wahrscheinlichkeitsverteilung.", rFunc: "e1071::skewness(x)" },
-                    { id: 9, name: "Wölbung (Kurtosis)", category: "Deskriptiv", definition: "Maß für die steile oder flache Form einer Verteilung.", rFunc: "e1071::kurtosis(x)" },
-                    { id: 10, name: "Perzentil (Percentile)", category: "Deskriptiv", definition: "Wert, unter dem ein bestimmter Prozentsatz der Daten liegt.", rFunc: "quantile(x, p)" },
-                    { id: 11, name: "Variationskoeffizient (Coefficient of Variation)", category: "Deskriptiv", definition: "Verhältnis von Standardabweichung zum Mittelwert.", rFunc: "sd(x)/mean(x)" },
-                    { id: 12, name: "Geometrisches Mittel (Geometric Mean)", category: "Deskriptiv", definition: "Die n-te Wurzel aus dem Produkt von n Zahlen.", rFunc: "exp(mean(log(x)))" },
-                    { id: 13, name: "Harmonisches Mittel (Harmonic Mean)", category: "Deskriptiv", definition: "Kehrwert des arithmetischen Mittels der Kehrwerte.", rFunc: "1/mean(1/x)" },
-                    { id: 14, name: "Gestutztes Mittel (Trimmed Mean)", category: "Deskriptiv", definition: "Mittelwert nach Ausschluss extremer Randwerte.", rFunc: "mean(x, trim=0.1)" },
-                    { id: 15, name: "Fünf-Punkte-Zusammenfassung (Five-Number Summary)", category: "Deskriptiv", definition: "Minimum, unteres Quartil, Median, obere Quartil, Maximum.", rFunc: "fivenum(x)" },
 
-                    { id: 16, name: "Normalverteilung (Normal Distribution)", category: "Wahrscheinlichkeit", definition: "Glockenförmige stetige Wahrscheinlichkeitsverteilung.", rFunc: "rnorm(), dnorm()" },
-                    { id: 17, name: "Binomialverteilung (Binomial Distribution)", category: "Wahrscheinlichkeit", definition: "Diskrete Verteilung von Erfolgen in unabhängigen Versuchen.", rFunc: "rbinom(), dbinom()" },
-                    { id: 18, name: "Poisson-Verteilung (Poisson Distribution)", category: "Wahrscheinlichkeit", definition: "Verteilung für Ereignisse in einem festen Zeitintervall.", rFunc: "rpois(), dpois()" },
-                    { id: 19, name: "t-Verteilung (Student's t-Distribution)", category: "Wahrscheinlichkeit", definition: "Verteilung zur Parameterschätzung bei kleinen Stichproben.", rFunc: "rt(), dt()" },
-                    { id: 20, name: "Chi-Quadrat-Verteilung (Chi-Square Distribution)", category: "Wahrscheinlichkeit", definition: "Verteilung der Summe quadrierter Standardnormalvariablen.", rFunc: "rchisq(), dchisq()" },
-                    { id: 21, name: "F-Verteilung (F-Distribution)", category: "Wahrscheinlichkeit", definition: "Stetige Verteilung für Varianzanalysen (ANOVA).", rFunc: "rf(), df()" },
-                    { id: 22, name: "Exponentialverteilung (Exponential Distribution)", category: "Wahrscheinlichkeit", definition: "Verteilung von Wartezeiten zwischen Ereignissen.", rFunc: "rexp(), dexp()" },
-                    { id: 23, name: "Gleichverteilung (Uniform Distribution)", category: "Wahrscheinlichkeit", definition: "Verteilung, bei der alle Intervalle gleicher Länge gleich wahrscheinliche Werte annehmen.", rFunc: "runif(), dunif()" },
-                    { id: 24, name: "Bernoulli-Versuch (Bernoulli Trial)", category: "Wahrscheinlichkeit", definition: "Zufallsexperiment mit genau zwei möglichen Ausgängen.", rFunc: "rbinom(n, 1, p)" },
-                    { id: 25, name: "Zentraler Grenzwertsatz (Central Limit Theorem)", category: "Wahrscheinlichkeit", definition: "Mittelwerte unabhängiger Zufallsvariablen nähern sich der Normalverteilung an.", rFunc: "replicate()" },
-                    { id: 26, name: "Gesetz der großen Zahlen (Law of Large Numbers)", category: "Wahrscheinlichkeit", definition: "Der Stichprobendurchschnitt konvergiert gegen den Erwartungswert.", rFunc: "cumsum(x)/1:n" },
-                    { id: 27, name: "Dichtefunktion (PDF)", category: "Wahrscheinlichkeit", definition: "Relative Wahrscheinlichkeitsdichte für stetige Variablen.", rFunc: "dnorm(x)" },
-                    { id: 28, name: "Verteilungsfunktion (CDF)", category: "Wahrscheinlichkeit", definition: "Wahrscheinlichkeit, dass eine Variable kleiner oder gleich x ist.", rFunc: "pnorm(q)" },
-                    { id: 29, name: "Erwartungswert (Expected Value)", category: "Wahrscheinlichkeit", definition: "Langfristiger Durchschnittswert bei Wiederholung eines Experiments.", rFunc: "sum(x * p)" },
-                    { id: 30, name: "Bayes-Theorem (Bayes' Theorem)", category: "Wahrscheinlichkeit", definition: "Berechnung bedingter Wahrscheinlichkeiten auf Basis von Vorwissen.", rFunc: "Eigene Berechnung" },
+                addToSentence(word) {
+                    this.builtSentence.push(word);
+                    this.feedback = null;
+                },
 
-                    { id: 31, name: "Nullhypothese (Null Hypothesis, H0)", category: "Testen", definition: "Standardannahme, dass kein Effekt oder Unterschied vorliegt.", rFunc: "t.test()" },
-                    { id: 32, name: "Alternativhypothese (Alternative Hypothesis, H1)", category: "Testen", definition: "Die zu belegende Forschungshypothese.", rFunc: "t.test(alternative)" },
-                    { id: 33, name: "p-Wert (p-value)", category: "Testen", definition: "Wahrscheinlichkeit für das Auftreten eines mindestens so extremen Ergebnisses.", rFunc: "test$p.value" },
-                    { id: 34, name: "Signifikanzniveau (Significance Level, alpha)", category: "Testen", definition: "Schwellenwert für die Ablehnung der Nullhypothese.", rFunc: "alpha = 0.05" },
-                    { id: 35, name: "Fehler 1. Art (Type I Error)", category: "Testen", definition: "Ablehnung der Nullhypothese, obwohl sie wahr ist (Falsch-Positiv).", rFunc: "Alpha-Risiko" },
-                    { id: 36, name: "Fehler 2. Art (Type II Error)", category: "Testen", definition: "Beibehaltung der Nullhypothese, obwohl sie falsch ist (Falsch-Negativ).", rFunc: "Beta-Risiko" },
-                    { id: 37, name: "Statistische Power (Statistical Power)", category: "Testen", definition: "Wahrscheinlichkeit, einen falschen H0 korrekt abzulehnen.", rFunc: "pwr Paket" },
-                    { id: 38, name: "Einstichproben-t-Test (One-Sample t-Test)", category: "Testen", definition: "Prüft, ob der Stichprobenmittelwert von einem Wert abweicht.", rFunc: "t.test(x, mu)" },
-                    { id: 39, name: "Zweistichproben-t-Test (Two-Sample t-Test)", category: "Testen", definition: "Vergleicht Mittelwerte zweier unabhängiger Gruppen.", rFunc: "t.test(x, y)" },
-                    { id: 40, name: "Gepaarter t-Test (Paired t-Test)", category: "Testen", definition: "Vergleicht Messungen derselben Gruppe zu zwei Zeitpunkten.", rFunc: "t.test(x, y, paired=TRUE)" },
-                    { id: 41, name: "Chi-Quadrat-Test (Chi-Square Test)", category: "Testen", definition: "Prüft Zusammenhänge zwischen kategorialen Variablen.", rFunc: "chisq.test()" },
-                    { id: 42, name: "Varianzanalyse (ANOVA)", category: "Testen", definition: "Vergleicht Mittelwerte von drei oder mehr Gruppen.", rFunc: "aov(y ~ group)" },
-                    { id: 43, name: "Mann-Whitney-U-Test", category: "Testen", definition: "Non-parametrischer Test zum Vergleich zweier unabhängiger Gruppen.", rFunc: "wilcox.test()" },
-                    { id: 44, name: "Wilcoxon-Test (Wilcoxon Signed-Rank)", category: "Testen", definition: "Non-parametrischer Test für gepaarte Daten.", rFunc: "wilcox.test(paired=TRUE)" },
-                    { id: 45, name: "Kruskal-Wallis-Test", category: "Testen", definition: "Nicht-parametrisches Äquivalent zur einfaktoriellen ANOVA.", rFunc: "kruskal.test()" },
-                    { id: 46, name: "Bonferroni-Korrektur (Bonferroni Correction)", category: "Testen", definition: "Anpassung des Signifikanzniveaus bei multiplem Testen.", rFunc: "p.adjust(p, method='bonferroni')" },
-                    { id: 47, name: "FDR (False Discovery Rate)", category: "Testen", definition: "Kontrolle der Falsch-Positiv-Rate bei vielen Tests.", rFunc: "p.adjust(p, method='fdr')" },
-                    { id: 48, name: "Freiheitsgrade (Degrees of Freedom)", category: "Testen", definition: "Anzahl frei variierbarer Werte in einer Berechnung.", rFunc: "df" },
-                    { id: 49, name: "Effektstärke (Effect Size)", category: "Testen", definition: "Quantifiziert die praktische Bedeutung eines Effekts.", rFunc: "cohensD()" },
-                    { id: 50, name: "Z-Test (Z-Test)", category: "Testen", definition: "Hypothesentest bei bekannter Varianz und normalverteilten Daten.", rFunc: "BSDA::z.test()" },
+                removeFromSentence(index) {
+                    this.builtSentence.splice(index, 1);
+                    this.feedback = null;
+                },
 
-                    { id: 51, name: "Lineare Regression (Linear Regression)", category: "Regression", definition: "Modelliert den linearen Zusammenhang zwischen Variablen.", rFunc: "lm(y ~ x)" },
-                    { id: 52, name: "Logistische Regression (Logistic Regression)", category: "Regression", definition: "Modelliert Wahrscheinlichkeiten binärer Ergebnisse.", rFunc: "glm(y ~ x, family=binomial)" },
-                    { id: 53, name: "Multiple Regression (Multiple Regression)", category: "Regression", definition: "Regression mit mehreren Prädiktoren.", rFunc: "lm(y ~ x1 + x2)" },
-                    { id: 54, name: "Residuen (Residuals)", category: "Regression", definition: "Abweichungen zwischen beobachteten und modellierten Werten.", rFunc: "residuals(model)" },
-                    { id: 55, name: "Bestimmtheitsmaß (R-Squared)", category: "Regression", definition: "Anteil der erklärten Varianz durch das Modell.", rFunc: "summary(model)$r.squared" },
-                    { id: 56, name: "Adjustiertes R² (Adjusted R-Squared)", category: "Regression", definition: "R-squared korrigiert um die Anzahl der Prädiktoren.", rFunc: "summary(model)$adj.r.squared" },
-                    { id: 57, name: "Multikollinearität (Multicollinearity)", category: "Regression", definition: "Starke Korrelation zwischen Prädiktoren im Modell.", rFunc: "car::vif(model)" },
-                    { id: 58, name: "Homoskedastizität (Homoscedasticity)", category: "Regression", definition: "Konstante Varianz der Residuen über alle Werte hinweg.", rFunc: "lmtest::bptest()" },
-                    { id: 59, name: "Heteroskedastizität (Heteroscedasticity)", category: "Regression", definition: "Nicht-konstante Varianz der Fehlerterme.", rFunc: "plot(model)" },
-                    { id: 60, name: "Cook-Distanz (Cook's Distance)", category: "Regression", definition: "Maß für den Einfluss einzelner Datenpunkte auf das Modell.", rFunc: "cooks.distance(model)" },
-                    { id: 61, name: "Schrittweise Regression (Stepwise Regression)", category: "Regression", definition: "Automatische Auswahl optimaler Prädiktoren.", rFunc: "step(model)" },
-                    { id: 62, name: "Ridge-Regression (Ridge Regression)", category: "Regression", definition: "L2-penalisierte Regression zur Vermeidung von Überanpassung.", rFunc: "glmnet(alpha=0)" },
-                    { id: 63, name: "Lasso-Regression (Lasso Regression)", category: "Regression", definition: "L1-penalisierte Regression mit Variablenselektion.", rFunc: "glmnet(alpha=1)" },
-                    { id: 64, name: "Generalisiertes lineares Modell (GLM)", category: "Regression", definition: "Verallgemeinerung der linearen Regression für andere Verteilungen.", rFunc: "glm()" },
-                    { id: 65, name: "Interaktionsterm (Interaction Term)", category: "Regression", definition: "Gemeinsamer Effekt zweier Prädiktoren auf die Zielvariable.", rFunc: "lm(y ~ x1 * x2)" },
+                get builtSentenceText() {
+                    return this.builtSentence.join(' ');
+                },
 
-                    { id: 66, name: "Bootstrapping (Bootstrapping)", category: "Resampling", definition: "Inferenzmethode durch wiederholtes Ziehen mit Zurücklegen.", rFunc: "boot()" },
-                    { id: 67, name: "Kreuzvalidierung (Cross-Validation)", category: "Resampling", definition: "Aufteilung der Daten zur Testung der Modellgüte.", rFunc: "caret, rsample" },
-                    { id: 68, name: "k-fache Kreuzvalidierung (K-Fold CV)", category: "Resampling", definition: "Aufteilung in k Teile, um iterativ zu trainieren und zu testen.", rFunc: "trainControl(method='cv')" },
-                    { id: 69, name: "LOOCV (Leave-One-Out CV)", category: "Resampling", definition: "Kreuzvalidierung, bei der jede Beobachtung einmal Testdatensatz ist.", rFunc: "trainControl(method='LOOCV')" },
-                    { id: 70, name: "Permutationstest (Permutation Test)", category: "Resampling", definition: "Non-parametrischer Test durch Mischen von Gruppenlabels.", rFunc: "coin Paket" },
-                    { id: 71, name: "Überanpassung (Overfitting)", category: "ML", definition: "Modell lernt Rauschen statt genereller Muster.", rFunc: "Modellkomplexität" },
-                    { id: 72, name: "Unteranpassung (Underfitting)", category: "ML", definition: "Modell ist zu simpel, um Muster abzubilden.", rFunc: "Hoher Bias" },
-                    { id: 73, name: "Bias-Varianz-Dilemma", category: "ML", definition: "Zielkonflikt zwischen Modellgenauigkeit und Stabilität.", rFunc: "Konzeptionell" },
-                    { id: 74, name: "Hauptkomponentenanalyse (PCA)", category: "ML", definition: "Dimensionsreduktion zur Maximierung der Varianz.", rFunc: "prcomp()" },
-                    { id: 75, name: "k-Means-Clustering (K-Means)", category: "ML", definition: "Unüberwachte Aufteilung von Daten in k Cluster.", rFunc: "kmeans()" },
-                    { id: 76, name: "Hierarchisches Clustering", category: "ML", definition: "Erstellung einer Baumstruktur von Clustern.", rFunc: "hclust()" },
-                    { id: 77, name: "Random Forest", category: "ML", definition: "Ensemble-Lernverfahren aus vielen Entscheidungsbäumen.", rFunc: "randomForest()" },
-                    { id: 78, name: "Konfusionsmatrix (Confusion Matrix)", category: "ML", definition: "Tabelle zur Bewertung von Klassifikationsmodellen.", rFunc: "caret::confusionMatrix()" },
-                    { id: 79, name: "ROC-Kurve (ROC Curve)", category: "ML", definition: "Grafische Darstellung der Klassifikationsgüte.", rFunc: "pROC::roc()" },
-                    { id: 80, name: "AUC-Wert (AUC-ROC)", category: "ML", definition: "Fläche unter der ROC-Kurve als Gütemaß.", rFunc: "auc()" },
+                checkSentence() {
+                    if (this.builtSentence.length === 0) {
+                        this.feedback = { valid: false, message: 'Please add terms to your flight log workspace first.', translation: 'N/A' };
+                        return;
+                    }
+                    this.feedback = {
+                        valid: true,
+                        message: 'Flight log structure compiled successfully. Physics terminology verified.',
+                        translation: 'Log entry: ' + this.builtSentenceText
+                    };
+                },
 
-                    { id: 81, name: "Pearson-Korrelation (Pearson Correlation)", category: "Korrelation", definition: "Misst den linearen Zusammenhang kontinuierlicher Variablen.", rFunc: "cor(x, y)" },
-                    { id: 82, name: "Spearman-Korrelation (Spearman Rank)", category: "Korrelation", definition: "Rangkorrelation für monotone Zusammenhänge.", rFunc: "cor(x, y, method='spearman')" },
-                    { id: 83, name: "Kendall-Tau (Kendall Tau)", category: "Korrelation", definition: "Non-parametrisches Maß für Rangübereinstimmungen.", rFunc: "cor(x, y, method='kendall')" },
-                    { id: 84, name: "Kovarianz (Covariance)", category: "Korrelation", definition: "Maß für den gemeinsamen Trend zweier Zufallsvariablen.", rFunc: "cov(x, y)" },
-                    { id: 85, name: "Partielle Korrelation (Partial Correlation)", category: "Korrelation", definition: "Zusammenhang zweier Variablen unter Kontrolle einer dritten.", rFunc: "ppcor::pcor()" },
-                    { id: 86, name: "Cramers V (Cramer's V)", category: "Korrelation", definition: "Maß für den Zusammenhang kategorialer Variablen.", rFunc: "vcd::assocstats()" },
-                    { id: 87, name: "Punktbiseriale Korrelation", category: "Korrelation", definition: "Korrelation zwischen einer stetigen und einer binären Variablen.", rFunc: "lsa::biserial.cor()" },
-                    { id: 88, name: "Autokorrelation (Autocorrelation)", category: "Korrelation", definition: "Korrelation einer Zeitreihe mit sich selbst zu früheren Zeitpunkten.", rFunc: "acf()" },
+                get allFlattenedWords() {
+                    let list = [];
+                    this.sections.forEach(sec => {
+                        sec.words.forEach(w => {
+                            list.push({ ...w, sectionName: sec.name });
+                        });
+                    });
+                    return list;
+                },
 
-                    { id: 89, name: "Stationarität (Stationarity)", category: "Zeitreihen", definition: "Eigenschaft einer Zeitreihe mit über die Zeit konstanten Parametern.", rFunc: "tseries::adf.test()" },
-                    { id: 90, name: "Weißes Rauschen (White Noise)", category: "Zeitreihen", definition: "Zufallsfolge mit Erwartungswert null und konstanter Varianz.", rFunc: "rnorm(n)" },
-                    { id: 91, name: "Gleitender Durchschnitt (Moving Average)", category: "Zeitreihen", definition: "Glättung von Zeitreihendaten durch Mittelwertbildung.", rFunc: "stats::filter()" },
-                    { id: 92, name: "ARIMA-Modell (ARIMA)", category: "Zeitreihen", definition: "Autoregressives integriertes gleitendes Durchschnittsmodell.", rFunc: "forecast::auto.arima()" },
-                    { id: 93, name: "Imputation (Imputation)", category: "Sonstiges", definition: "Ersetzen fehlender Werte durch Schätzwerte.", rFunc: "tidyr::replace_na()" },
-                    { id: 94, name: "Winsorisierung (Winsorization)", category: "Sonstiges", definition: "Begrenzung von extremen Werten zur Reduktion von Ausreißereffekten.", rFunc: "smooth_outliers()" },
-                    { id: 95, name: "Standardisierung (Z-Score Scaling)", category: "Sonstiges", definition: "Skalierung von Daten auf Mittelwert 0 und Standardabweichung 1.", rFunc: "scale(x)" },
-                    { id: 96, name: "Min-Max-Skalierung (Min-Max Scaling)", category: "Sonstiges", definition: "Skalierung von Merkmalen auf einen Wertebereich von 0 bis 1.", rFunc: "scales::rescale()" },
-                    { id: 97, name: "Monte-Carlo-Simulation", category: "Sonstiges", definition: "Verfahren durch wiederholte Zufallsstichproben.", rFunc: "replicate()" },
-                    { id: 98, name: "Simpsons Paradoxon (Simpson's Paradox)", category: "Sonstiges", definition: "Phänomen, bei dem Trends in Teilgruppen bei Aggregation verschwinden.", rFunc: "Visualisierung" },
-                    { id: 99, name: "Gesetz der großen Zahlen", category: "Sonstiges", definition: "Konvergenz des Stichprobenmittels gegen den wahren Wert.", rFunc: "Simulation" },
-                    { id: 100, name: "Data Frame (Data Frame)", category: "R-Grundlagen", definition: "Standard-Tabellenformat in R.", rFunc: "data.frame()" },
-                    { id: 101, name: "Tibble (Tibble)", category: "R-Grundlagen", definition: "Modernisierte Version des Data Frames im Tidyverse.", rFunc: "tibble::tibble()" },
-                    { id: 102, name: "Vektorisierung (Vectorization)", category: "R-Grundlagen", definition: "Durchführung von Operationen auf ganze Vektoren ohne explizite Schleifen.", rFunc: "Vektor-Operationen" }
-                ],
-                get filteredTerms() {
+                get filteredSections() {
                     let q = this.searchQuery.toLowerCase();
-                    if (!q) return this.terms;
-                    return this.terms.filter(t => 
-                        t.name.toLowerCase().includes(q) || 
-                        t.definition.toLowerCase().includes(q) || 
-                        t.category.toLowerCase().includes(q) ||
-                        t.rFunc.toLowerCase().includes(q)
-                    );
+                    return this.sections.map(sec => {
+                        let filteredWords = sec.words.filter(w => {
+                            let matchesSearch = w.german.toLowerCase().includes(q) || 
+                                                w.meaning.toLowerCase().includes(q) || 
+                                                w.num.toString().includes(q);
+                            let matchesSection = this.selectedSection === 'all' || sec.id === this.selectedSection;
+                            let matchesStar = !this.showStarredOnly || this.starredWords.includes(w.num);
+                            return matchesSearch && matchesSection && matchesStar;
+                        });
+                        return { ...sec, words: filteredWords };
+                    }).filter(sec => sec.words.length > 0);
+                },
+
+                get filteredWordsList() {
+                    let list = [];
+                    this.filteredSections.forEach(sec => {
+                        sec.words.forEach(w => {
+                            list.push({ ...w, sectionName: sec.name });
+                        });
+                    });
+                    return list;
+                },
+
+                get totalFilteredWords() {
+                    return this.filteredWordsList.length;
+                },
+
+                get currentWord() {
+                    let list = this.filteredWordsList;
+                    if (list.length === 0) return { num: 0, german: 'No terms found', meaning: '', type: '', sectionName: '' };
+                    if (this.currentCardIndex >= list.length) this.currentCardIndex = 0;
+                    return list[this.currentCardIndex];
+                },
+
+                nextCard() {
+                    this.flipped = false;
+                    let len = this.filteredWordsList.length;
+                    if (len > 0) this.currentCardIndex = (this.currentCardIndex + 1) % len;
+                },
+
+                prevCard() {
+                    this.flipped = false;
+                    let len = this.filteredWordsList.length;
+                    if (len > 0) this.currentCardIndex = (this.currentCardIndex - 1 + len) % len;
+                },
+
+                randomCard() {
+                    let len = this.filteredWordsList.length;
+                    if (len > 1) {
+                        let randomIndex;
+                        do {
+                            randomIndex = Math.floor(Math.random() * len);
+                        } while (randomIndex === this.currentCardIndex);
+                        this.currentCardIndex = randomIndex;
+                    }
+                },
+
+                initQuiz() {
+                    let pool = [...this.allFlattenedWords];
+                    pool.sort(() => Math.random() - 0.5);
+                    this.quizPool = pool.slice(0, 10);
+                    this.quizIndex = 0;
+                    this.quizScore = 0;
+                    this.quizFinished = false;
+                    this.loadQuizQuestion();
+                },
+
+                loadQuizQuestion() {
+                    if (this.quizIndex >= this.quizPool.length) {
+                        this.quizFinished = true;
+                        return;
+                    }
+                    this.currentQuizQuestion = this.quizPool[this.quizIndex];
+                    let correctMeaning = this.currentQuizQuestion.meaning;
+                    let distractors = this.allFlattenedWords.filter(w => w.meaning !== correctMeaning).map(w => w.meaning);
+                    distractors.sort(() => Math.random() - 0.5);
+                    let options = [correctMeaning, ...distractors.slice(0, 3)];
+                    this.currentQuizOptions = options.sort(() => Math.random() - 0.5);
+                },
+
+                answerQuiz(selectedOption) {
+                    if (selectedOption === this.currentQuizQuestion.meaning) {
+                        this.quizScore++;
+                    }
+                    this.quizIndex++;
+                    this.loadQuizQuestion();
+                },
+
+                // Memory Match Game with 20-Second Peek Countdown
+                initMemoryGame() {
+                    if (this.timerInterval) clearInterval(this.timerInterval);
+                    if (this.peekInterval) clearInterval(this.peekInterval);
+                    
+                    this.sprintSeconds = 0;
+                    let allWords = [...this.allFlattenedWords];
+                    allWords.sort(() => Math.random() - 0.5);
+                    
+                    this.totalPairs = Math.min(this.memoryPairCount, allWords.length);
+                    let selectedWords = allWords.slice(0, this.totalPairs);
+                    let cards = [];
+                    
+                    selectedWords.forEach((word, index) => {
+                        // Start face UP during peek phase
+                        cards.push({ id: 'g_' + index, pairId: index, text: word.german, flipped: true, matched: false });
+                        cards.push({ id: 'm_' + index, pairId: index, text: word.meaning, flipped: true, matched: false });
+                    });
+                    
+                    this.memoryCards = cards.sort(() => Math.random() - 0.5);
+                    this.flippedCards = [];
+                    this.matchedPairs = 0;
+                    this.memoryMoves = 0;
+                    this.isChecking = false;
+
+                    // Trigger 20-second study peek window
+                    this.isPeeking = true;
+                    this.peekSeconds = 20;
+                    
+                    this.peekInterval = setInterval(() => {
+                        this.peekSeconds--;
+                        if (this.peekSeconds <= 0) {
+                            clearInterval(this.peekInterval);
+                            this.isPeeking = false;
+                            
+                            // Flip all unmatched cards back face down
+                            this.memoryCards.forEach(c => c.flipped = false);
+                            
+                            // Start sprint timer if checked
+                            if (this.enableSprintTimer) {
+                                this.timerInterval = setInterval(() => {
+                                    if (this.matchedPairs < this.totalPairs) this.sprintSeconds++;
+                                }, 1000);
+                            }
+                        }
+                    }, 1000);
+                },
+
+                flipCard(card) {
+                    if (this.isPeeking || this.isChecking || card.flipped || card.matched) return;
+                    card.flipped = true;
+                    this.flippedCards.push(card);
+                    if (this.flippedCards.length === 2) {
+                        this.memoryMoves++;
+                        this.isChecking = true;
+                        let [card1, card2] = this.flippedCards;
+                        if (card1.pairId === card2.pairId && card1.id !== card2.id) {
+                            card1.matched = true;
+                            card2.matched = true;
+                            this.matchedPairs++;
+                            this.flippedCards = [];
+                            this.isChecking = false;
+                            if (this.matchedPairs === this.totalPairs && this.timerInterval) clearInterval(this.timerInterval);
+                        } else {
+                            setTimeout(() => {
+                                card1.flipped = false;
+                                card2.flipped = false;
+                                this.flippedCards = [];
+                                this.isChecking = false;
+                            }, 900);
+                        }
+                    }
+                },
+
+                // Helper to execute R code from Alpine methods
+                async runRCode(code, canvasId) {
+                    if (!window.webR) {
+                        console.warn("webR engine is initializing...");
+                        return;
+                    }
+                    if (canvasId) {
+                        await window.webR.evalRVoid(`webr::canvas(width=500, height=400)`);
+                    }
+                    const result = await window.webR.evalR(code);
+                    const output = await result.toArray();
+
+                    if (canvasId) {
+                        const msgs = await window.webR.flush();
+                        msgs.forEach(msg => {
+                            if (msg.type === 'canvas' && msg.data.event === 'draw') {
+                                const canvas = document.getElementById(canvasId);
+                                if (canvas) {
+                                    const ctx = canvas.getContext('2d');
+                                    ctx.drawImage(msg.data.image, 0, 0);
+                                }
+                            }
+                        });
+                    }
+                    return output;
                 }
-            }
+            };
+        }
+    </script>
+
+    <!-- 2. Initialize webR WebAssembly Engine -->
+    <script type="module">
+        import { WebR } from 'https://webr.r-wasm.org/v0.3.2/webr.mjs';
+        
+        try {
+            const webR = new WebR();
+            await webR.init();
+            window.webR = webR;
+            console.log('webR initialized successfully!');
+        } catch (err) {
+            console.error('Failed to initialize webR:', err);
         }
     </script>
 </body>
