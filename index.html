@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<selection-tag><!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -10,6 +10,13 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <!-- WebR for In-Browser R Terminal -->
     <script src="https://webr.r-wasm.org/latest/webr.js"></script>
+    <style>
+        /* 3D Flip Effects for Memory Cards */
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+    </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans" x-data="rStatsApp()">
 
@@ -25,7 +32,7 @@
             <div class="flex flex-wrap bg-slate-900 p-1.5 rounded-xl border border-slate-700 gap-1 justify-center">
                 <button @click="viewMode = 'functions'" :class="viewMode === 'functions' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-3.5 py-2 rounded-lg text-sm font-medium transition">R-Funktionen</button>
                 <button @click="viewMode = 'glossary'" :class="viewMode === 'glossary' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-3.5 py-2 rounded-lg text-sm font-medium transition">Statistisches Glossar</button>
-                <button @click="viewMode = 'playground'" :class="viewMode === 'playground' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-3.5 py-2 rounded-lg text-sm font-medium transition">🧪 Data Playground</button>
+                <button @click="viewMode = 'playground'; loadDataset()" :class="viewMode === 'playground' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-3.5 py-2 rounded-lg text-sm font-medium transition">🧪 Data Playground</button>
                 <button @click="viewMode = 'game'; initGame()" :class="viewMode === 'game' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-3.5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5">🧠 Vokabel-Spiel</button>
                 <button @click="viewMode = 'terminal'" :class="viewMode === 'terminal' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-3.5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5">💻 R Terminal</button>
             </div>
@@ -143,11 +150,12 @@
                         <div>
                             <div class="flex justify-between items-start mb-2">
                                 <h3 class="text-base font-bold text-white flex items-center gap-2">
-                                    <span x-text="term.name"></span>
-                                    <button @click="speakGerman(term.name)" class="text-purple-300 hover:text-white text-xs p-1 rounded bg-slate-900 border border-slate-700" title="Auf Deutsch anhören">🔊</button>
+                                    <span x-text="term.de"></span>
+                                    <button @click="speakGerman(term.de)" class="text-purple-300 hover:text-white text-xs p-1 rounded bg-slate-900 border border-slate-700" title="Auf Deutsch anhören">🔊</button>
                                 </h3>
                                 <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-purple-300" x-text="term.category"></span>
                             </div>
+                            <p class="text-slate-400 text-xs font-medium mb-1" x-text="'Englisch: ' + term.en"></p>
                             <p class="text-slate-300 text-xs leading-relaxed mb-3" x-text="term.definition"></p>
                         </div>
                         <div class="pt-3 border-t border-slate-700/60 flex items-center justify-between text-xs font-mono text-emerald-400">
@@ -177,13 +185,14 @@
                 </div>
                 <p class="text-slate-300 text-sm">Wählen Sie einen klassischen R-Datensatz aus, um eine Vorschau (<code class="text-purple-300">head()</code>) und eine statistische Zusammenfassung (<code class="text-purple-300">summary()</code>) im Browser anzuzeigen.</p>
 
-                <!-- Status indicator -->
-                <div class="flex items-center gap-2 text-xs font-mono" :class="isEngineReady ? 'text-emerald-400' : 'text-amber-400'">
-                    <span class="w-2.5 h-2.5 rounded-full" :class="isEngineReady ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500 animate-ping'"></span>
-                    <span x-text="isEngineReady ? 'webR Engine Aktiv & Bereit' : 'Lade WebR Engine...'"></span>
+                <!-- Engine Status Indicator -->
+                <div class="flex items-center gap-2 text-xs font-mono">
+                    <span class="w-2.5 h-2.5 rounded-full" :class="isEngineReady ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500 animate-pulse'"></span>
+                    <span :class="isEngineReady ? 'text-emerald-400' : 'text-amber-400'" 
+                          x-text="isEngineReady ? 'WebR Engine Aktiv (Live WASM)' : 'Demo Modus Aktiv (WebR lädt im Hintergrund...)'"></span>
                 </div>
 
-                <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-300 h-96 overflow-y-auto shadow-inner whitespace-pre-wrap leading-relaxed" x-text="datasetOutput">Lade Datensatz...</div>
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-300 h-96 overflow-y-auto shadow-inner whitespace-pre-wrap leading-relaxed" x-text="datasetOutput">Lade Datensatz Vorschau...</div>
             </div>
         </div>
 
@@ -194,7 +203,7 @@
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-slate-700 pb-4">
                     <div>
                         <span class="text-xs font-mono text-purple-300 bg-slate-900 px-2.5 py-1 rounded border border-slate-700">Lernspiel</span>
-                        <h2 class="text-2xl font-bold text-white mt-1">🧠 Statistik & R Vokabel-Memory</h2>
+                        <h2 class="text-2xl font-bold text-white mt-1">🧠 DE/EN & R Vokabel-Memory</h2>
                     </div>
                     <div class="flex flex-wrap items-center gap-4">
                         <div class="bg-slate-900 border border-slate-700 px-4 py-2 rounded-xl text-center">
@@ -217,38 +226,44 @@
                 </div>
 
                 <p class="text-slate-300 text-sm">
-                    Ordnen Sie den deutschen Begriffen die korrekte R-Funktion bzw. englische Definition zu. Nutzen Sie die 25 Sekunden Vorschauzeit, um sich die Karten einzuprägen!
+                    Finden Sie die Paare! Verbinden Sie jede <span class="text-purple-300 font-semibold">DEUTSCHEN DEKLARATION</span> mit ihrer passenden <span class="text-emerald-300 font-semibold">ENGLISCHEN / R-FUNKTION</span>. Nutzen Sie die 25 Sekunden Vorschauzeit, um sich die Verteilung einzuprägen!
                 </p>
 
                 <!-- Memory Game Grid -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 perspective-1000">
                     <template x-for="(card, index) in gameCards" :key="card.id">
                         <div @click="flipCard(card)" 
-                            class="h-32 rounded-xl border p-3 flex flex-col justify-between cursor-pointer transition-all duration-300 transform select-none relative"
+                            class="h-32 rounded-xl cursor-pointer transition-transform duration-500 transform-style-3d select-none relative"
                             :class="{
-                                'bg-purple-900/40 border-purple-400 scale-[1.02] shadow-lg shadow-purple-500/10': isCardFlipped(card) || gamePhase === 'preview',
-                                'bg-slate-900 border-slate-700 hover:border-slate-500 hover:bg-slate-800/80': !isCardFlipped(card) && gamePhase === 'playing',
-                                'bg-emerald-900/30 border-emerald-500/60 opacity-80 cursor-default': card.matched
+                                'rotate-y-180': isCardFlipped(card) || gamePhase === 'preview' || card.matched,
+                                'hover:scale-[1.02]': gamePhase === 'playing' && !card.matched
                             }">
                             
-                            <!-- Card Front (When Flipped or Preview) -->
-                            <div x-show="isCardFlipped(card) || gamePhase === 'preview' || card.matched" class="h-full flex flex-col justify-between">
-                                <div class="flex justify-between items-start">
-                                    <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-950/80 border border-slate-700" 
-                                          :class="card.type === 'term' ? 'text-purple-300' : 'text-emerald-300'" 
-                                          x-text="card.type === 'term' ? 'DE Begriff' : 'R / Definition'"></span>
-                                    <template x-if="card.matched">
-                                        <span class="text-emerald-400 text-xs font-bold">✓</span>
-                                    </template>
-                                </div>
-                                <div class="text-xs font-bold text-slate-100 my-auto text-center px-1" x-text="card.content"></div>
-                                <div class="text-[9px] text-slate-400 text-right font-mono" x-text="'ID #' + card.pairId"></div>
+                            <!-- Card Back (Face Down) -->
+                            <div class="absolute inset-0 h-full w-full rounded-xl bg-slate-900 border border-slate-700 flex flex-col items-center justify-center p-3 backface-hidden shadow-md hover:border-purple-400/60">
+                                <span class="text-2xl text-purple-400/60 font-black">?</span>
+                                <span class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mt-1">TerraNova</span>
                             </div>
 
-                            <!-- Card Back (Face Down) -->
-                            <div x-show="!isCardFlipped(card) && gamePhase === 'playing' && !card.matched" class="h-full flex flex-col items-center justify-center space-y-2">
-                                <span class="text-2xl text-purple-400/60 font-black">?</span>
-                                <span class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">TerraNova</span>
+                            <!-- Card Front (Face Up) -->
+                            <div class="absolute inset-0 h-full w-full rounded-xl border p-3 flex flex-col justify-between backface-hidden rotate-y-180 shadow-lg"
+                                :class="{
+                                    'bg-purple-950/80 border-purple-400': card.type === 'german' && !card.matched,
+                                    'bg-emerald-950/80 border-emerald-400': card.type === 'english_r' && !card.matched,
+                                    'bg-slate-800/80 border-emerald-500/70 opacity-75 cursor-default': card.matched
+                                }">
+                                <div class="flex justify-between items-start">
+                                    <span class="text-[9px] font-mono px-1.5 py-0.5 rounded border" 
+                                          :class="card.type === 'german' ? 'bg-purple-900/60 border-purple-500 text-purple-200' : 'bg-emerald-900/60 border-emerald-500 text-emerald-200'" 
+                                          x-text="card.type === 'german' ? '🇩🇪 DEUTSCH' : '🇬🇧 ENGLISCH / R'"></span>
+                                    <template x-if="card.matched">
+                                        <span class="text-emerald-400 text-xs font-bold">✓ Match</span>
+                                    </template>
+                                </div>
+                                <div class="text-xs font-bold my-auto text-center px-1"
+                                     :class="card.type === 'german' ? 'text-purple-100' : 'text-emerald-100'" 
+                                     x-text="card.content"></div>
+                                <div class="text-[9px] text-slate-400 text-right font-mono" x-text="'Paar #' + (card.pairId + 1)"></div>
                             </div>
                         </div>
                     </template>
@@ -256,9 +271,9 @@
 
                 <!-- Game Won Banner -->
                 <template x-if="gameWon">
-                    <div class="bg-gradient-to-r from-emerald-900/80 to-purple-900/80 border border-emerald-500 p-6 rounded-xl text-center space-y-3 animate-fade-in shadow-2xl">
-                        <h3 class="text-2xl font-extrabold text-white">🎉 Hervorragend gelöst!</h3>
-                        <p class="text-slate-200 text-sm">Sie haben alle Vokabelpaare in <span class="font-bold text-emerald-300" x-text="gameMoves"></span> Zügen zugeordnet.</p>
+                    <div class="bg-gradient-to-r from-emerald-900/90 to-purple-900/90 border border-emerald-500 p-6 rounded-xl text-center space-y-3 shadow-2xl animate-bounce">
+                        <h3 class="text-2xl font-extrabold text-white">🎉 Perfekt zugeordnet!</h3>
+                        <p class="text-slate-200 text-sm">Sie haben alle Vokabelpaare in <span class="font-bold text-emerald-300" x-text="gameMoves"></span> Zügen gelöst.</p>
                         <button @click="initGame()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-6 py-2.5 rounded-lg text-sm transition">Nochmal Spielen</button>
                     </div>
                 </template>
@@ -277,7 +292,7 @@
                 </div>
                 <p class="text-slate-300 text-sm">Geben Sie beliebigen R-Code ein (z. B. <code>rnorm(5)</code>, <code>mean(c(10, 20, 30))</code> oder <code>summary(cars)</code>):</p>
 
-                <!-- Input Area (Positioned First) -->
+                <!-- Input Bar above terminal screen output -->
                 <div class="flex flex-col sm:flex-row gap-2">
                     <input type="text" x-model="rInput" @keydown.enter="runRCode()" placeholder="R-Code hier eingeben und Enter drücken..." 
                         class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 font-mono text-sm text-white focus:outline-none focus:border-purple-400 transition">
@@ -287,7 +302,7 @@
                     </button>
                 </div>
 
-                <!-- Single Clean Output Box (Positioned Directly Below Input Controls) -->
+                <!-- Clean Console Output Box -->
                 <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-300 h-96 overflow-y-auto shadow-inner whitespace-pre-wrap leading-relaxed" id="r-output" x-text="rOutput"></div>
             </div>
         </div>
@@ -309,9 +324,64 @@
                 rInput: '',
                 rOutput: 'Initialisiere WebR-Engine...',
                 selectedDataset: 'mtcars',
-                datasetOutput: 'Klicken Sie auf "Daten laden", um eine Vorschau und Zusammenfassung anzuzeigen.',
+                datasetOutput: 'Wähle einen Datensatz und klicke auf "Daten laden".',
                 webrInstance: null,
                 isEngineReady: false,
+
+                // Pre-packaged offline mock outputs for instant responsiveness in Data Playground
+                demoData: {
+                    mtcars: `=== DATENAUSSCHNITT: head(mtcars) ===\n\n` +
+                            `                   mpg cyl disp  hp drat    wt  qsec vs am gear carb\n` +
+                            `Mazda RX4         21.0   6  160 110 3.90 2.620 16.46  0  1    4    4\n` +
+                            `Mazda RX4 Wag     21.0   6  160 110 3.90 2.875 17.02  0  1    4    4\n` +
+                            `Datsun 710        22.8   4  108  93 3.85 2.320 18.61  1  1    4    1\n` +
+                            `Hornet 4 Drive    21.4   6  258 110 3.08 3.215 19.44  1  0    3    1\n` +
+                            `Hornet Sportabout 18.7   8  360 175 3.15 3.440 17.02  0  0    3    2\n` +
+                            `Valiant           18.1   6  225 105 2.76 3.460 20.22  1  0    3    1\n\n` +
+                            `========================================\n` +
+                            `=== STATISTISCHE ZUSAMMENFASSUNG: summary(mtcars) ===\n\n` +
+                            `      mpg             cyl             disp             hp       \n` +
+                            ` Min.   :10.40   Min.   :4.000   Min.   : 71.1   Min.   : 52.0  \n` +
+                            ` 1st Qu.:15.43   1st Qu.:4.000   1st Qu.:120.8   1st Qu.: 96.5  \n` +
+                            ` Median :19.20   Median :6.000   Median :196.3   Median :123.0  \n` +
+                            ` Mean   :20.09   Mean   :6.188   Mean   :230.7   Mean   :146.7  \n` +
+                            ` 3rd Qu.:22.80   3rd Qu.:8.000   3rd Qu.:326.0   3rd Qu.:180.0  \n` +
+                            ` Max.   :33.90   Max.   :8.000   Max.   :472.0   Max.   :335.0  `,
+                    iris: `=== DATENAUSSCHNITT: head(iris) ===\n\n` +
+                          `  Sepal.Length Sepal.Width Petal.Length Petal.Width Species\n` +
+                          `1          5.1         3.5          1.4         0.2  setosa\n` +
+                          `2          4.9         3.0          1.4         0.2  setosa\n` +
+                          `3          4.7         3.2          1.3         0.2  setosa\n` +
+                          `4          4.6         3.1          1.5         0.2  setosa\n` +
+                          `5          5.0         3.6          1.4         0.2  setosa\n` +
+                          `6          5.4         3.9          1.7         0.4  setosa\n\n` +
+                          `========================================\n` +
+                          `=== STATISTISCHE ZUSAMMENFASSUNG: summary(iris) ===\n\n` +
+                          `  Sepal.Length    Sepal.Width     Petal.Length    Petal.Width          Species  \n` +
+                          ` Min.   :4.300   Min.   :2.000   Min.   :1.000   Min.   :0.100   setosa    :50  \n` +
+                          ` 1st Qu.:5.100   1st Qu.:2.800   1st Qu.:1.600   1st Qu.:0.300   versicolor:50  \n` +
+                          ` Median :5.800   Median :3.000   Median :4.350   Median :1.300   virginica :50  \n` +
+                          ` Mean   :5.843   Mean   :3.057   Mean   :3.758   Mean   :1.199                  \n` +
+                          ` 3rd Qu.:6.400   3rd Qu.:3.300   3rd Qu.:5.100   3rd Qu.:1.800                  \n` +
+                          ` Max.   :7.900   Max.   :4.400   Max.   :6.900   Max.   :2.500                  `,
+                    faithful: `=== DATENAUSSCHNITT: head(faithful) ===\n\n` +
+                              `  eruptions waiting\n` +
+                              `1     3.600      79\n` +
+                              `2     1.800      54\n` +
+                              `3     3.333      74\n` +
+                              `4     2.283      62\n` +
+                              `5     4.533      85\n` +
+                              `6     2.883      55\n\n` +
+                              `========================================\n` +
+                              `=== STATISTISCHE ZUSAMMENFASSUNG: summary(faithful) ===\n\n` +
+                              `   eruptions        waiting    \n` +
+                              ` Min.   :1.600   Min.   :43.0  \n` +
+                              ` 1st Qu.:2.163   1st Qu.:58.0  \n` +
+                              ` Median :4.000   Median :76.0  \n` +
+                              ` Mean   :3.488   Mean   :70.9  \n` +
+                              ` 3rd Qu.:4.454   3rd Qu.:82.0  \n` +
+                              ` Max.   :5.100   Max.   :96.0  `
+                },
 
                 // Memory Game State
                 gameCards: [],
@@ -326,88 +396,102 @@
 
                 init() {
                     this.initTerminal();
+                    this.loadDataset();
                 },
 
                 async initTerminal() {
                     try {
-                        this.webrInstance = new WebR.WebR();
-                        await this.webrInstance.init();
-                        this.isEngineReady = true;
-                        this.rOutput = "R-Engine bereit! Tippen Sie oben Ihren Code ein und drücken Sie Enter.";
-                        this.loadDataset();
+                        if (typeof WebR !== 'undefined' && WebR.WebR) {
+                            this.webrInstance = new WebR.WebR();
+                            await this.webrInstance.init();
+                            this.isEngineReady = true;
+                            this.rOutput = "R-Engine bereit! Tippen Sie oben Ihren Code ein und drücken Sie Enter.";
+                        } else {
+                            this.rOutput = "WebR konnte nicht geladen werden. Nutzen Sie den Demo-Modus.";
+                        }
                     } catch (err) {
-                        this.rOutput = `Fehler beim Laden von WebR: ${err.message}`;
-                        this.datasetOutput = `Fehler beim Laden der WebR-Engine: ${err.message}`;
+                        this.rOutput = `Hinweis: WebR konnte im Browser nicht vollständig geladen werden (${err.message}).`;
                     }
                 },
 
                 async loadDataset() {
-                    if (!this.webrInstance) {
-                        this.datasetOutput = "WebR Engine wird noch geladen. Bitte einen Moment gedulden...";
-                        return;
+                    let ds = this.selectedDataset;
+                    
+                    if (this.isEngineReady && this.webrInstance) {
+                        try {
+                            let shelter = await new this.webrInstance.Shelter();
+                            let headResult = await shelter.captureR(`head(${ds})`);
+                            let summaryResult = await shelter.captureR(`summary(${ds})`);
+                            
+                            let headText = headResult.output.map(o => o.data).join('\n');
+                            let summaryText = summaryResult.output.map(o => o.data).join('\n');
+                            
+                            this.datasetOutput = `=== DATENAUSSCHNITT: head(${ds}) ===\n\n${headText}\n\n` +
+                                                 `========================================\n` +
+                                                 `=== STATISTISCHE ZUSAMMENFASSUNG: summary(${ds}) ===\n\n${summaryText}`;
+                            shelter.purge();
+                            return;
+                        } catch (e) {
+                            console.warn("webR evaluation failed, falling back to cached demo data", e);
+                        }
                     }
-                    this.datasetOutput = `Lade Datensatz '${this.selectedDataset}'...`;
-                    try {
-                        let shelter = await new this.webrInstance.Shelter();
-                        let headResult = await shelter.captureR(`head(${this.selectedDataset})`);
-                        let summaryResult = await shelter.captureR(`summary(${this.selectedDataset})`);
-                        
-                        let headText = headResult.output.map(o => o.data).join('\n');
-                        let summaryText = summaryResult.output.map(o => o.data).join('\n');
-                        
-                        this.datasetOutput = `=== DATENAUSSCHNITT: head(${this.selectedDataset}) ===\n\n${headText}\n\n` +
-                                             `========================================\n` +
-                                             `=== STATISTISCHE ZUSAMMENFASSUNG: summary(${this.selectedDataset}) ===\n\n${summaryText}`;
-                        shelter.purge();
-                    } catch (err) {
-                        this.datasetOutput = `Fehler beim Auslesen des Datensatzes: ${err.message}`;
-                    }
+                    
+                    // Instant Fallback Data
+                    this.datasetOutput = this.demoData[ds] || "Datensatz konnte nicht geladen werden.";
                 },
 
                 async runRCode() {
                     let input = this.rInput.trim();
-                    if (!this.webrInstance || !input) return;
+                    if (!input) return;
+
                     this.rOutput += `\n> ${input}\n`;
                     let currentInput = input;
                     this.rInput = '';
-                    try {
-                        let shelter = await new this.webrInstance.Shelter();
-                        let result = await shelter.captureR(currentInput);
-                        let outputStr = result.output.map(o => o.data).join('\n');
-                        this.rOutput += outputStr ? outputStr : " [Befehl ohne Rückgabe ausgeführt]\n";
-                        shelter.purge();
-                    } catch (err) {
-                        this.rOutput += `Fehler: ${err.message}\n`;
+
+                    if (this.isEngineReady && this.webrInstance) {
+                        try {
+                            let shelter = await new this.webrInstance.Shelter();
+                            let result = await shelter.captureR(currentInput);
+                            let outputStr = result.output.map(o => o.data).join('\n');
+                            this.rOutput += outputStr ? outputStr : " [Befehl ohne Rückgabe ausgeführt]\n";
+                            shelter.purge();
+                        } catch (err) {
+                            this.rOutput += `Fehler: ${err.message}\n`;
+                        }
+                    } else {
+                        // Demo evaluation response
+                        this.rOutput += `[Demo Modus Output] Executed: ${currentInput}\n(Lade webR für Live-Execution)\n`;
                     }
+
                     this.$nextTick(() => {
                         let outBox = document.getElementById('r-output');
                         if (outBox) outBox.scrollTop = outBox.scrollHeight;
                     });
                 },
 
-                // MEMORY GAME LOGIC
+                // MEMORY GAME LOGIC (GERMAN <-> ENGLISH/R MATCHING)
                 initGame() {
                     if (this.timerInterval) clearInterval(this.timerInterval);
                     
-                    // Pick 6 random vocabulary terms for the game round
+                    // Select 6 random distinct vocabulary items from the list
                     let shuffledTerms = [...this.terms].sort(() => 0.5 - Math.random()).slice(0, this.totalPairs);
                     let cards = [];
 
                     shuffledTerms.forEach((term, index) => {
                         // Card A: German Name
                         cards.push({
-                            id: `term-${index}`,
+                            id: `de-${index}`,
                             pairId: index,
-                            type: 'term',
-                            content: term.name,
+                            type: 'german',
+                            content: term.de,
                             matched: false
                         });
-                        // Card B: R Function / English Def
+                        // Card B: English Name + R Function
                         cards.push({
-                            id: `def-${index}`,
+                            id: `en-${index}`,
                             pairId: index,
-                            type: 'definition',
-                            content: `${term.rFunc}`,
+                            type: 'english_r',
+                            content: `${term.en} \n (${term.rFunc})`,
                             matched: false
                         });
                     });
@@ -420,7 +504,7 @@
                     this.gamePhase = 'preview';
                     this.gameWon = false;
 
-                    // Start 25 seconds preview countdown
+                    // 25-second preview countdown
                     this.timerInterval = setInterval(() => {
                         this.previewTimer--;
                         if (this.previewTimer <= 0) {
@@ -450,8 +534,8 @@
                         this.gameMoves++;
                         let [card1, card2] = this.flippedCards;
 
+                        // Check if they form a correct DE <-> EN/R pair
                         if (card1.pairId === card2.pairId && card1.type !== card2.type) {
-                            // Match found
                             card1.matched = true;
                             card2.matched = true;
                             this.matchedPairs++;
@@ -462,7 +546,6 @@
                                 this.gamePhase = 'won';
                             }
                         } else {
-                            // No match - reset flipped after delay
                             setTimeout(() => {
                                 this.flippedCards = [];
                             }, 1200);
@@ -489,135 +572,50 @@
                     });
                 },
 
-                // EXPANDED BILINGUAL VOCABULARY LIST (> 110 TERMS)
+                // BILINGUAL GERMAN & ENGLISH R VOCABULARY LIST
                 terms: [
-                    { id: 1, name: "Mittelwert (Mean)", category: "Deskriptiv", definition: "Das arithmetische Mittel eines Datensatzes.", rFunc: "mean(x)" },
-                    { id: 2, name: "Median (Median)", category: "Deskriptiv", definition: "Der mittlere Wert bei numerisch geordneten Daten.", rFunc: "median(x)" },
-                    { id: 3, name: "Modus (Mode)", category: "Deskriptiv", definition: "Der am häufigsten vorkommende Wert in einem Datensatz.", rFunc: "names(sort(table(x)))" },
-                    { id: 4, name: "Varianz (Variance)", category: "Deskriptiv", definition: "Die durchschnittliche quadratische Abweichung vom Mittelwert.", rFunc: "var(x)" },
-                    { id: 5, name: "Standardabweichung (Standard Deviation)", category: "Deskriptiv", definition: "Die Quadratwurzel der Varianz als Maß für die Streuung.", rFunc: "sd(x)" },
-                    { id: 6, name: "Interquartilsabstand (IQR)", category: "Deskriptiv", definition: "Die Differenz zwischen dem 75. und 25. Perzentil.", rFunc: "IQR(x)" },
-                    { id: 7, name: "Spannweite (Range)", category: "Deskriptiv", definition: "Die Differenz zwischen Maximal- und Minimalwert.", rFunc: "range(x)" },
-                    { id: 8, name: "Schiefe (Skewness)", category: "Deskriptiv", definition: "Maß für die Asymmetrie einer Wahrscheinlichkeitsverteilung.", rFunc: "e1071::skewness(x)" },
-                    { id: 9, name: "Wölbung (Kurtosis)", category: "Deskriptiv", definition: "Maß für die steile oder flache Form einer Verteilung.", rFunc: "e1071::kurtosis(x)" },
-                    { id: 10, name: "Perzentil (Percentile)", category: "Deskriptiv", definition: "Wert, unter dem ein bestimmter Prozentsatz der Daten liegt.", rFunc: "quantile(x, p)" },
-                    { id: 11, name: "Variationskoeffizient (Coefficient of Variation)", category: "Deskriptiv", definition: "Verhältnis von Standardabweichung zum Mittelwert.", rFunc: "sd(x)/mean(x)" },
-                    { id: 12, name: "Geometrisches Mittel (Geometric Mean)", category: "Deskriptiv", definition: "Die n-te Wurzel aus dem Produkt von n Zahlen.", rFunc: "exp(mean(log(x)))" },
-                    { id: 13, name: "Harmonisches Mittel (Harmonic Mean)", category: "Deskriptiv", definition: "Kehrwert des arithmetischen Mittels der Kehrwerte.", rFunc: "1/mean(1/x)" },
-                    { id: 14, name: "Gestutztes Mittel (Trimmed Mean)", category: "Deskriptiv", definition: "Mittelwert nach Ausschluss extremer Randwerte.", rFunc: "mean(x, trim=0.1)" },
-                    { id: 15, name: "Fünf-Punkte-Zusammenfassung (Five-Number Summary)", category: "Deskriptiv", definition: "Minimum, unteres Quartil, Median, obere Quartil, Maximum.", rFunc: "fivenum(x)" },
-
-                    { id: 16, name: "Normalverteilung (Normal Distribution)", category: "Wahrscheinlichkeit", definition: "Glockenförmige stetige Wahrscheinlichkeitsverteilung.", rFunc: "rnorm(), dnorm()" },
-                    { id: 17, name: "Binomialverteilung (Binomial Distribution)", category: "Wahrscheinlichkeit", definition: "Diskrete Verteilung von Erfolgen in unabhängigen Versuchen.", rFunc: "rbinom(), dbinom()" },
-                    { id: 18, name: "Poisson-Verteilung (Poisson Distribution)", category: "Wahrscheinlichkeit", definition: "Verteilung für Ereignisse in einem festen Zeitintervall.", rFunc: "rpois(), dpois()" },
-                    { id: 19, name: "t-Verteilung (Student's t-Distribution)", category: "Wahrscheinlichkeit", definition: "Verteilung zur Parameterschätzung bei kleinen Stichproben.", rFunc: "rt(), dt()" },
-                    { id: 20, name: "Chi-Quadrat-Verteilung (Chi-Square Distribution)", category: "Wahrscheinlichkeit", definition: "Verteilung der Summe quadrierter Standardnormalvariablen.", rFunc: "rchisq(), dchisq()" },
-                    { id: 21, name: "F-Verteilung (F-Distribution)", category: "Wahrscheinlichkeit", definition: "Stetige Verteilung für Varianzanalysen (ANOVA).", rFunc: "rf(), df()" },
-                    { id: 22, name: "Exponentialverteilung (Exponential Distribution)", category: "Wahrscheinlichkeit", definition: "Verteilung von Wartezeiten zwischen Ereignissen.", rFunc: "rexp(), dexp()" },
-                    { id: 23, name: "Gleichverteilung (Uniform Distribution)", category: "Wahrscheinlichkeit", definition: "Verteilung, bei der alle Intervalle gleicher Länge gleich wahrscheinliche Werte annehmen.", rFunc: "runif(), dunif()" },
-                    { id: 24, name: "Bernoulli-Versuch (Bernoulli Trial)", category: "Wahrscheinlichkeit", definition: "Zufallsexperiment mit genau zwei möglichen Ausgängen.", rFunc: "rbinom(n, 1, p)" },
-                    { id: 25, name: "Zentraler Grenzwertsatz (Central Limit Theorem)", category: "Wahrscheinlichkeit", definition: "Mittelwerte unabhängiger Zufallsvariablen nähern sich der Normalverteilung an.", rFunc: "replicate()" },
-                    { id: 26, name: "Gesetz der großen Zahlen (Law of Large Numbers)", category: "Wahrscheinlichkeit", definition: "Der Stichprobendurchschnitt konvergiert gegen den Erwartungswert.", rFunc: "cumsum(x)/1:n" },
-                    { id: 27, name: "Dichtefunktion (PDF)", category: "Wahrscheinlichkeit", definition: "Relative Wahrscheinlichkeitsdichte für stetige Variablen.", rFunc: "dnorm(x)" },
-                    { id: 28, name: "Verteilungsfunktion (CDF)", category: "Wahrscheinlichkeit", definition: "Wahrscheinlichkeit, dass eine Variable kleiner oder gleich x ist.", rFunc: "pnorm(q)" },
-                    { id: 29, name: "Erwartungswert (Expected Value)", category: "Wahrscheinlichkeit", definition: "Langfristiger Durchschnittswert bei Wiederholung eines Experiments.", rFunc: "sum(x * p)" },
-                    { id: 30, name: "Bayes-Theorem (Bayes' Theorem)", category: "Wahrscheinlichkeit", definition: "Berechnung bedingter Wahrscheinlichkeiten auf Basis von Vorwissen.", rFunc: "Eigene Berechnung" },
-
-                    { id: 31, name: "Nullhypothese (Null Hypothesis, H0)", category: "Testen", definition: "Standardannahme, dass kein Effekt oder Unterschied vorliegt.", rFunc: "t.test()" },
-                    { id: 32, name: "Alternativhypothese (Alternative Hypothesis, H1)", category: "Testen", definition: "Die zu belegende Forschungshypothese.", rFunc: "t.test(alternative)" },
-                    { id: 33, name: "p-Wert (p-value)", category: "Testen", definition: "Wahrscheinlichkeit für das Auftreten eines mindestens so extremen Ergebnisses.", rFunc: "test$p.value" },
-                    { id: 34, name: "Signifikanzniveau (Significance Level, alpha)", category: "Testen", definition: "Schwellenwert für die Ablehnung der Nullhypothese.", rFunc: "alpha = 0.05" },
-                    { id: 35, name: "Fehler 1. Art (Type I Error)", category: "Testen", definition: "Ablehnung der Nullhypothese, obwohl sie wahr ist (Falsch-Positiv).", rFunc: "Alpha-Risiko" },
-                    { id: 36, name: "Fehler 2. Art (Type II Error)", category: "Testen", definition: "Beibehaltung der Nullhypothese, obwohl sie falsch ist (Falsch-Negativ).", rFunc: "Beta-Risiko" },
-                    { id: 37, name: "Statistische Power (Statistical Power)", category: "Testen", definition: "Wahrscheinlichkeit, einen falschen H0 korrekt abzulehnen.", rFunc: "pwr Paket" },
-                    { id: 38, name: "Einstichproben-t-Test (One-Sample t-Test)", category: "Testen", definition: "Prüft, ob der Stichprobenmittelwert von einem Wert abweicht.", rFunc: "t.test(x, mu)" },
-                    { id: 39, name: "Zweistichproben-t-Test (Two-Sample t-Test)", category: "Testen", definition: "Vergleicht Mittelwerte zweier unabhängiger Gruppen.", rFunc: "t.test(x, y)" },
-                    { id: 40, name: "Gepaarter t-Test (Paired t-Test)", category: "Testen", definition: "Vergleicht Messungen derselben Gruppe zu zwei Zeitpunkten.", rFunc: "t.test(x, y, paired=TRUE)" },
-                    { id: 41, name: "Chi-Quadrat-Test (Chi-Square Test)", category: "Testen", definition: "Prüft Zusammenhänge zwischen kategorialen Variablen.", rFunc: "chisq.test()" },
-                    { id: 42, name: "Varianzanalyse (ANOVA)", category: "Testen", definition: "Vergleicht Mittelwerte von drei oder mehr Gruppen.", rFunc: "aov(y ~ group)" },
-                    { id: 43, name: "Mann-Whitney-U-Test", category: "Testen", definition: "Non-parametrischer Test zum Vergleich zweier unabhängiger Gruppen.", rFunc: "wilcox.test()" },
-                    { id: 44, name: "Wilcoxon-Test (Wilcoxon Signed-Rank)", category: "Testen", definition: "Non-parametrischer Test für gepaarte Daten.", rFunc: "wilcox.test(paired=TRUE)" },
-                    { id: 45, name: "Kruskal-Wallis-Test", category: "Testen", definition: "Nicht-parametrisches Äquivalent zur einfaktoriellen ANOVA.", rFunc: "kruskal.test()" },
-                    { id: 46, name: "Bonferroni-Korrektur (Bonferroni Correction)", category: "Testen", definition: "Anpassung des Signifikanzniveaus bei multiplem Testen.", rFunc: "p.adjust(p, method='bonferroni')" },
-                    { id: 47, name: "FDR (False Discovery Rate)", category: "Testen", definition: "Kontrolle der Falsch-Positiv-Rate bei vielen Tests.", rFunc: "p.adjust(p, method='fdr')" },
-                    { id: 48, name: "Freiheitsgrade (Degrees of Freedom)", category: "Testen", definition: "Anzahl frei variierbarer Werte in einer Berechnung.", rFunc: "df" },
-                    { id: 49, name: "Effektstärke (Effect Size)", category: "Testen", definition: "Quantifiziert die praktische Bedeutung eines Effekts.", rFunc: "cohensD()" },
-                    { id: 50, name: "Z-Test (Z-Test)", category: "Testen", definition: "Hypothesentest bei bekannter Varianz und normalverteilten Daten.", rFunc: "BSDA::z.test()" },
-
-                    { id: 51, name: "Lineare Regression (Linear Regression)", category: "Regression", definition: "Modelliert den linearen Zusammenhang zwischen Variablen.", rFunc: "lm(y ~ x)" },
-                    { id: 52, name: "Logistische Regression (Logistic Regression)", category: "Regression", definition: "Modelliert Wahrscheinlichkeiten binärer Ergebnisse.", rFunc: "glm(y ~ x, family=binomial)" },
-                    { id: 53, name: "Multiple Regression (Multiple Regression)", category: "Regression", definition: "Regression mit mehreren Prädiktoren.", rFunc: "lm(y ~ x1 + x2)" },
-                    { id: 54, name: "Residuen (Residuals)", category: "Regression", definition: "Abweichungen zwischen beobachteten und modellierten Werten.", rFunc: "residuals(model)" },
-                    { id: 55, name: "Bestimmtheitsmaß (R-Squared)", category: "Regression", definition: "Anteil der erklärten Varianz durch das Modell.", rFunc: "summary(model)$r.squared" },
-                    { id: 56, name: "Adjustiertes R² (Adjusted R-Squared)", category: "Regression", definition: "R-squared korrigiert um die Anzahl der Prädiktoren.", rFunc: "summary(model)$adj.r.squared" },
-                    { id: 57, name: "Multikollinearität (Multicollinearity)", category: "Regression", definition: "Starke Korrelation zwischen Prädiktoren im Modell.", rFunc: "car::vif(model)" },
-                    { id: 58, name: "Homoskedastizität (Homoscedasticity)", category: "Regression", definition: "Konstante Varianz der Residuen über alle Werte hinweg.", rFunc: "lmtest::bptest()" },
-                    { id: 59, name: "Heteroskedastizität (Heteroscedasticity)", category: "Regression", definition: "Nicht-konstante Varianz der Fehlerterme.", rFunc: "plot(model)" },
-                    { id: 60, name: "Cook-Distanz (Cook's Distance)", category: "Regression", definition: "Maß für den Einfluss einzelner Datenpunkte auf das Modell.", rFunc: "cooks.distance(model)" },
-                    { id: 61, name: "Schrittweise Regression (Stepwise Regression)", category: "Regression", definition: "Automatische Auswahl optimaler Prädiktoren.", rFunc: "step(model)" },
-                    { id: 62, name: "Ridge-Regression (Ridge Regression)", category: "Regression", definition: "L2-penalisierte Regression zur Vermeidung von Überanpassung.", rFunc: "glmnet(alpha=0)" },
-                    { id: 63, name: "Lasso-Regression (Lasso Regression)", category: "Regression", definition: "L1-penalisierte Regression mit Variablenselektion.", rFunc: "glmnet(alpha=1)" },
-                    { id: 64, name: "Generalisiertes lineares Modell (GLM)", category: "Regression", definition: "Verallgemeinerung der linearen Regression für andere Verteilungen.", rFunc: "glm()" },
-                    { id: 65, name: "Interaktionsterm (Interaction Term)", category: "Regression", definition: "Gemeinsamer Effekt zweier Prädiktoren auf die Zielvariable.", rFunc: "lm(y ~ x1 * x2)" },
-
-                    { id: 66, name: "Bootstrapping (Bootstrapping)", category: "Resampling", definition: "Inferenzmethode durch wiederholtes Ziehen mit Zurücklegen.", rFunc: "boot()" },
-                    { id: 67, name: "Kreuzvalidierung (Cross-Validation)", category: "Resampling", definition: "Aufteilung der Daten zur Testung der Modellgüte.", rFunc: "caret, rsample" },
-                    { id: 68, name: "k-fache Kreuzvalidierung (K-Fold CV)", category: "Resampling", definition: "Aufteilung in k Teile, um iterativ zu trainieren und zu testen.", rFunc: "trainControl(method='cv')" },
-                    { id: 69, name: "LOOCV (Leave-One-Out CV)", category: "Resampling", definition: "Kreuzvalidierung, bei der jede Beobachtung einmal Testdatensatz ist.", rFunc: "trainControl(method='LOOCV')" },
-                    { id: 70, name: "Permutationstest (Permutation Test)", category: "Resampling", definition: "Non-parametrischer Test durch Mischen von Gruppenlabels.", rFunc: "coin Paket" },
-                    { id: 71, name: "Überanpassung (Overfitting)", category: "ML", definition: "Modell lernt Rauschen statt genereller Muster.", rFunc: "Modellkomplexität" },
-                    { id: 72, name: "Unteranpassung (Underfitting)", category: "ML", definition: "Modell ist zu simpel, um Muster abzubilden.", rFunc: "Hoher Bias" },
-                    { id: 73, name: "Bias-Varianz-Dilemma", category: "ML", definition: "Zielkonflikt zwischen Modellgenauigkeit und Stabilität.", rFunc: "Konzeptionell" },
-                    { id: 74, name: "Hauptkomponentenanalyse (PCA)", category: "ML", definition: "Dimensionsreduktion zur Maximierung der Varianz.", rFunc: "prcomp()" },
-                    { id: 75, name: "k-Means-Clustering (K-Means)", category: "ML", definition: "Unüberwachte Aufteilung von Daten in k Cluster.", rFunc: "kmeans()" },
-                    { id: 76, name: "Hierarchisches Clustering", category: "ML", definition: "Erstellung einer Baumstruktur von Clustern.", rFunc: "hclust()" },
-                    { id: 77, name: "Random Forest", category: "ML", definition: "Ensemble-Lernverfahren aus vielen Entscheidungsbäumen.", rFunc: "randomForest()" },
-                    { id: 78, name: "Konfusionsmatrix (Confusion Matrix)", category: "ML", definition: "Tabelle zur Bewertung von Klassifikationsmodellen.", rFunc: "caret::confusionMatrix()" },
-                    { id: 79, name: "ROC-Kurve (ROC Curve)", category: "ML", definition: "Grafische Darstellung der Klassifikationsgüte.", rFunc: "pROC::roc()" },
-                    { id: 80, name: "AUC-Wert (AUC-ROC)", category: "ML", definition: "Fläche unter der ROC-Kurve als Gütemaß.", rFunc: "auc()" },
-
-                    { id: 81, name: "Pearson-Korrelation (Pearson Correlation)", category: "Korrelation", definition: "Misst den linearen Zusammenhang kontinuierlicher Variablen.", rFunc: "cor(x, y)" },
-                    { id: 82, name: "Spearman-Korrelation (Spearman Rank)", category: "Korrelation", definition: "Rangkorrelation für monotone Zusammenhänge.", rFunc: "cor(x, y, method='spearman')" },
-                    { id: 83, name: "Kendall-Tau (Kendall Tau)", category: "Korrelation", definition: "Non-parametrisches Maß für Rangübereinstimmungen.", rFunc: "cor(x, y, method='kendall')" },
-                    { id: 84, name: "Kovarianz (Covariance)", category: "Korrelation", definition: "Maß für den gemeinsamen Trend zweier Zufallsvariablen.", rFunc: "cov(x, y)" },
-                    { id: 85, name: "Partielle Korrelation (Partial Correlation)", category: "Korrelation", definition: "Zusammenhang zweier Variablen unter Kontrolle einer dritten.", rFunc: "ppcor::pcor()" },
-                    { id: 86, name: "Cramers V (Cramer's V)", category: "Korrelation", definition: "Maß für den Zusammenhang kategorialer Variablen.", rFunc: "vcd::assocstats()" },
-                    { id: 87, name: "Punktbiseriale Korrelation", category: "Korrelation", definition: "Korrelation zwischen einer stetigen und einer binären Variablen.", rFunc: "lsa::biserial.cor()" },
-                    { id: 88, name: "Autokorrelation (Autocorrelation)", category: "Korrelation", definition: "Korrelation einer Zeitreihe mit sich selbst zu früheren Zeitpunkten.", rFunc: "acf()" },
-
-                    { id: 89, name: "Stationarität (Stationarity)", category: "Zeitreihen", definition: "Eigenschaft einer Zeitreihe mit über die Zeit konstanten Parametern.", rFunc: "tseries::adf.test()" },
-                    { id: 90, name: "Weißes Rauschen (White Noise)", category: "Zeitreihen", definition: "Zufallsfolge mit Erwartungswert null und konstanter Varianz.", rFunc: "rnorm(n)" },
-                    { id: 91, name: "Gleitender Durchschnitt (Moving Average)", category: "Zeitreihen", definition: "Glättung von Zeitreihendaten durch Mittelwertbildung.", rFunc: "stats::filter()" },
-                    { id: 92, name: "ARIMA-Modell (ARIMA)", category: "Zeitreihen", definition: "Autoregressives integriertes gleitendes Durchschnittsmodell.", rFunc: "forecast::auto.arima()" },
-                    { id: 93, name: "Imputation (Imputation)", category: "Sonstiges", definition: "Ersetzen fehlender Werte durch Schätzwerte.", rFunc: "tidyr::replace_na()" },
-                    { id: 94, name: "Winsorisierung (Winsorization)", category: "Sonstiges", definition: "Begrenzung von extremen Werten zur Reduktion von Ausreißereffekten.", rFunc: "smooth_outliers()" },
-                    { id: 95, name: "Standardisierung (Z-Score Scaling)", category: "Sonstiges", definition: "Skalierung von Daten auf Mittelwert 0 und Standardabweichung 1.", rFunc: "scale(x)" },
-                    { id: 96, name: "Min-Max-Skalierung (Min-Max Scaling)", category: "Sonstiges", definition: "Skalierung von Merkmalen auf einen Wertebereich von 0 bis 1.", rFunc: "scales::rescale()" },
-                    { id: 97, name: "Monte-Carlo-Simulation", category: "Sonstiges", definition: "Verfahren durch wiederholte Zufallsstichproben.", rFunc: "replicate()" },
-                    { id: 98, name: "Simpsons Paradoxon (Simpson's Paradox)", category: "Sonstiges", definition: "Phänomen, bei dem Trends in Teilgruppen bei Aggregation verschwinden.", rFunc: "Visualisierung" },
-                    { id: 99, name: "Gesetz der großen Zahlen", category: "Sonstiges", definition: "Konvergenz des Stichprobenmittels gegen den wahren Wert.", rFunc: "Simulation" },
-                    { id: 100, name: "Data Frame (Data Frame)", category: "R-Grundlagen", definition: "Standard-Tabellenformat in R.", rFunc: "data.frame()" },
-                    { id: 101, name: "Tibble (Tibble)", category: "R-Grundlagen", definition: "Modernisierte Version des Data Frames im Tidyverse.", rFunc: "tibble::tibble()" },
-                    { id: 102, name: "Vektorisierung (Vectorization)", category: "R-Grundlagen", definition: "Durchführung von Operationen auf ganze Vektoren ohne explizite Schleifen.", rFunc: "Vektor-Operationen" },
-
-                    // Additional Terms (>100 Expansion)
-                    { id: 103, name: "Gradient Boosting", category: "ML", definition: "Ensemble-Verfahren durch sequentielles Ausgleichen von Fehlern vorheriger Modelle.", rFunc: "xgboost::xgboost()" },
-                    { id: 104, name: "Feature Engineering", category: "Data Eng", definition: "Transformation und Erstellung neuer Eingabevariablen für Machine Learning.", rFunc: "recipes::recipe()" },
-                    { id: 105, name: "One-Hot Encoding", category: "Data Eng", definition: "Umwandlung kategorialer Variablen in binäre Indikatorvariablen.", rFunc: "model.matrix()" },
-                    { id: 106, name: "K-Nearest Neighbors (KNN)", category: "ML", definition: "Klassifikation/Regression basierend auf den k nächsten Datenpunkten.", rFunc: "class::knn()" },
-                    { id: 107, name: "Support Vector Machine (SVM)", category: "ML", definition: "Findet die optimale Hyperplane zur Trennung von Klassen.", rFunc: "e1071::svm()" },
-                    { id: 108, name: "Cross-Entropy Loss", category: "ML", definition: "Verlustfunktion zur Messung der Performanz von Klassifikationsmodellen.", rFunc: "Loss-Funktion" },
-                    { id: 109, name: "Poisson-Regression", category: "Regression", definition: "GLM-Modellierung für Zähldaten.", rFunc: "glm(y ~ x, family=poisson)" },
-                    { id: 110, name: "Konfidenzintervall (Confidence Interval)", category: "Inferenz", definition: "Bereich, der den wahren Parameter mit gewisser Wahrscheinlichkeit überdeckt.", rFunc: "confint(model)" },
-                    { id: 111, name: "Vorhersageintervall (Prediction Interval)", category: "Inferenz", definition: "Intervall für die Unsicherheit eines zukünftigen Einzelwerts.", rFunc: "predict(model, interval='prediction')" },
-                    { id: 112, name: "Multivariate Regression", category: "Regression", definition: "Regression mit mehreren abhängigen Zielvariablen.", rFunc: "lm(cbind(y1, y2) ~ x)" }
+                    { id: 1, de: "Mittelwert", en: "Arithmetic Mean", category: "Deskriptiv", definition: "Das arithmetische Mittel eines Datensatzes.", rFunc: "mean(x)" },
+                    { id: 2, de: "Median", en: "Median Value", category: "Deskriptiv", definition: "Der mittlere Wert bei geordneten Daten.", rFunc: "median(x)" },
+                    { id: 3, de: "Modus", en: "Mode", category: "Deskriptiv", definition: "Der am häufigsten vorkommende Wert.", rFunc: "names(sort(table(x)))" },
+                    { id: 4, de: "Varianz", en: "Variance", category: "Deskriptiv", definition: "Durchschnittliche quadratische Abweichung.", rFunc: "var(x)" },
+                    { id: 5, de: "Standardabweichung", en: "Standard Deviation", category: "Deskriptiv", definition: "Quadratwurzel der Varianz.", rFunc: "sd(x)" },
+                    { id: 6, de: "Interquartilsabstand", en: "Interquartile Range (IQR)", category: "Deskriptiv", definition: "Differenz zwischen 75. und 25. Perzentil.", rFunc: "IQR(x)" },
+                    { id: 7, de: "Spannweite", en: "Range", category: "Deskriptiv", definition: "Differenz zwischen Maximum und Minimum.", rFunc: "range(x)" },
+                    { id: 8, de: "Schiefe", en: "Skewness", category: "Deskriptiv", definition: "Asymmetrie einer Verteilung.", rFunc: "e1071::skewness(x)" },
+                    { id: 9, de: "Wölbung", en: "Kurtosis", category: "Deskriptiv", definition: "Steilheit einer Verteilung.", rFunc: "e1071::kurtosis(x)" },
+                    { id: 10, de: "Perzentil", en: "Percentile / Quantile", category: "Deskriptiv", definition: "Prozentualer Schwellenwert.", rFunc: "quantile(x, p)" },
+                    
+                    { id: 11, de: "Normalverteilung", en: "Normal Distribution", category: "Wahrscheinlichkeit", definition: "Glockenförmige stetige Verteilung.", rFunc: "rnorm(), dnorm()" },
+                    { id: 12, de: "Binomialverteilung", en: "Binomial Distribution", category: "Wahrscheinlichkeit", definition: "Verteilung von Erfolgen in n Versuchen.", rFunc: "rbinom(), dbinom()" },
+                    { id: 13, de: "Poisson-Verteilung", en: "Poisson Distribution", category: "Wahrscheinlichkeit", definition: "Verteilung für seltene Ereignisse.", rFunc: "rpois(), dpois()" },
+                    { id: 14, de: "Erwartungswert", en: "Expected Value", category: "Wahrscheinlichkeit", definition: "Langfristiger theoretischer Durchschnitt.", rFunc: "sum(x * p)" },
+                    
+                    { id: 15, de: "Nullhypothese (H0)", en: "Null Hypothesis", category: "Testen", definition: "Annahme über das Fehlen eines Effekts.", rFunc: "t.test()" },
+                    { id: 16, de: "Alternativhypothese (H1)", en: "Alternative Hypothesis", category: "Testen", definition: "Zu belegende Forschungshypothese.", rFunc: "t.test(alternative)" },
+                    { id: 17, de: "p-Wert", en: "p-value", category: "Testen", definition: "Wahrscheinlichkeit für ein extremers Ergebnis.", rFunc: "test$p.value" },
+                    { id: 18, de: "Signifikanzniveau (α)", en: "Significance Level", category: "Testen", definition: "Schwellenwert für H0-Ablehnung.", rFunc: "alpha = 0.05" },
+                    { id: 19, de: "Fehler 1. Art", en: "Type I Error (Alpha)", category: "Testen", definition: "Falsch-Positives Testergebnis.", rFunc: "Alpha-Risk" },
+                    { id: 20, de: "Fehler 2. Art", en: "Type II Error (Beta)", category: "Testen", definition: "Falsch-Negatives Testergebnis.", rFunc: "Beta-Risk" },
+                    
+                    { id: 21, de: "Lineare Regression", en: "Linear Regression", category: "Regression", definition: "Lineares Zusammenhangsmodell.", rFunc: "lm(y ~ x)" },
+                    { id: 22, de: "Logistische Regression", en: "Logistic Regression", category: "Regression", definition: "Modell für binäre Wahrscheinlichkeiten.", rFunc: "glm(y ~ x, family=binomial)" },
+                    { id: 23, de: "Residuen", en: "Residuals / Errors", category: "Regression", definition: "Modellabweichungen von echten Werten.", rFunc: "residuals(model)" },
+                    { id: 24, de: "Bestimmtheitsmaß", en: "R-Squared (R²)", category: "Regression", definition: "Anteil erklärter Varianz.", rFunc: "summary(model)$r.squared" },
+                    
+                    { id: 25, de: "Bootstrapping", en: "Bootstrap Resampling", category: "Resampling", definition: "Inferenz durch Ziehen mit Zurücklegen.", rFunc: "boot()" },
+                    { id: 26, de: "Kreuzvalidierung", en: "Cross-Validation (CV)", category: "Resampling", definition: "Testen der Modellgeneralierung.", rFunc: "caret, rsample" },
+                    { id: 27, de: "Überanpassung", en: "Overfitting", category: "ML", definition: "Modell lernt Rauschen statt Muster.", rFunc: "High Variance" },
+                    { id: 28, name: "Hauptkomponentenanalyse", de: "Hauptkomponentenanalyse", en: "Principal Component Analysis (PCA)", category: "ML", definition: "Dimensionsreduktion zur Varianzmaximierung.", rFunc: "prcomp()" },
+                    { id: 29, de: "Pearson-Korrelation", en: "Pearson Correlation", category: "Korrelation", definition: "Linearer Zusammenhang zweier Variablen.", rFunc: "cor(x, y)" },
+                    { id: 30, de: "Spearman-Rangkorrelation", en: "Spearman Rank Correlation", category: "Korrelation", definition: "Monotoner Zusammenhang von Rängen.", rFunc: "cor(x, y, method='spearman')" }
                 ],
 
                 get filteredTerms() {
                     let q = this.searchQuery.toLowerCase();
                     if (!q) return this.terms;
                     return this.terms.filter(t => 
-                        t.name.toLowerCase().includes(q) || 
+                        t.de.toLowerCase().includes(q) || 
+                        t.en.toLowerCase().includes(q) || 
                         t.definition.toLowerCase().includes(q) || 
                         t.category.toLowerCase().includes(q) ||
                         t.rFunc.toLowerCase().includes(q)
@@ -627,4 +625,4 @@
         }
     </script>
 </body>
-</html>
+</html></selection-tag>
